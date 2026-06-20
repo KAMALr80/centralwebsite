@@ -20,8 +20,8 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-brand-navy text-[#C8D2E5] px-8 pt-14 pb-7">
-      <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-12 max-w-7xl mx-auto">
+    <footer className="bg-brand-navy text-[#C8D2E5] px-4 sm:px-6 md:px-8 pt-10 md:pt-14 pb-7">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] gap-8 lg:gap-12 max-w-7xl mx-auto">
         {/* Brand column */}
         <div>
           <Logo color="#FFFFFF" />
@@ -54,7 +54,7 @@ export function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="mt-12 pt-5 border-t border-[#1E3358] flex justify-between items-center font-mono text-[10px] tracking-[0.06em] uppercase text-[#6B7A95] max-w-7xl mx-auto">
+      <div className="mt-8 md:mt-12 pt-5 border-t border-[#1E3358] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-0 font-mono text-[10px] tracking-[0.06em] uppercase text-[#6B7A95] max-w-7xl mx-auto">
         <span>© {year} {companyName} Wholesale Inc.</span>
         <span>Brooklyn · Portland · Chicago</span>
       </div>
