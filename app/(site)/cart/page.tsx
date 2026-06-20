@@ -20,7 +20,7 @@ function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
         const done = n < step;
         return (
           <div key={label} className="flex items-center">
-            <div className="flex items-center gap-2 px-4 py-2.5">
+            <div className="flex items-center gap-2 px-2 sm:px-4 py-2.5">
               <span
                 className={`w-5 h-5 rounded-full flex items-center justify-center font-mono text-[10px] shrink-0 ${
                   active
@@ -33,7 +33,7 @@ function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
                 {done ? "✓" : n}
               </span>
               <span
-                className={`font-mono text-[10.5px] tracking-[0.06em] uppercase ${
+                className={`hidden sm:inline font-mono text-[10.5px] tracking-[0.06em] uppercase ${
                   active ? "text-brand-ink" : "text-brand-muted"
                 }`}
               >
@@ -142,10 +142,10 @@ export default function CartPage() {
   return (
     <div className="bg-brand-bg min-h-screen pb-20">
       {/* Page header */}
-      <div className="px-8 py-5 border-b border-brand-line bg-brand-white">
-        <div className="flex items-start justify-between">
+      <div className="px-4 sm:px-6 md:px-8 py-4 md:py-5 border-b border-brand-line bg-brand-white">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div>
-            <h1 className="font-serif text-[36px] font-normal text-brand-ink leading-none">
+            <h1 className="font-serif text-[26px] sm:text-[30px] md:text-[36px] font-normal text-brand-ink leading-none">
               Cart · draft P.O.
             </h1>
             <div className="mt-2 font-mono text-[11px] text-brand-muted tracking-[0.06em] uppercase">
@@ -171,7 +171,7 @@ export default function CartPage() {
           </Link>
         </div>
       ) : (
-        <div className="px-8 py-6 flex gap-6 max-w-[1400px] mx-auto items-start">
+        <div className="px-4 sm:px-6 md:px-8 py-4 md:py-6 flex flex-col lg:flex-row gap-6 max-w-[1400px] mx-auto">
           {/* Left — Cart groups */}
           <div className="flex-1 min-w-0 space-y-6">
             {groups.map((group) => {
@@ -189,7 +189,7 @@ export default function CartPage() {
                   className="bg-brand-white border border-brand-line"
                 >
                   {/* Group header */}
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-brand-line">
+                  <div className="flex items-center gap-3 px-4 py-3 border-b border-brand-line flex-wrap">
                     {firstItem.image ? (
                       <div className="w-12 h-12 relative overflow-hidden shrink-0 border border-brand-line">
                         <Image
@@ -215,7 +215,7 @@ export default function CartPage() {
                         <span className="text-brand-ink">${groupTotal.toFixed(2)}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-3 shrink-0 ml-auto">
                       <Link
                         href={`/product/${productId}`}
                         className="font-mono text-[10px] tracking-[0.06em] uppercase text-brand-blue hover:text-brand-blue-deep transition-colors"
@@ -226,64 +226,66 @@ export default function CartPage() {
                         onClick={() => group.items.forEach((i) => removeItem(i.product_id))}
                         className="font-mono text-[10px] tracking-[0.06em] uppercase text-brand-muted hover:text-[#B83434] transition-colors"
                       >
-                        Remove group
+                        Remove
                       </button>
                     </div>
                   </div>
 
                   {/* Variant rows */}
-                  <table className="w-full">
-                    <thead>
-                      <tr>
-                        <th className={TH}>SKU</th>
-                        <th className={TH}>Variant</th>
-                        <th className={`${TH} text-right`}>Unit price</th>
-                        <th className={`${TH} text-right`}>Qty</th>
-                        <th className={`${TH} text-right`}>Line total</th>
-                        <th className={`${TH} w-8`} />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {group.items.map((item) => (
-                        <tr key={item.product_id} className="hover:bg-brand-bg/50 transition-colors">
-                          <td className={`${TD} font-mono text-[11px] text-brand-muted w-28`}>
-                            {item.sku}
-                          </td>
-                          <td className={TD}>
-                            <span className="text-brand-ink">{item.name}</span>
-                          </td>
-                          <td className={`${TD} text-right font-mono`}>
-                            ${item.price.toFixed(2)}
-                          </td>
-                          <td className={`${TD} text-right`}>
-                            <QtyStepper
-                              value={item.quantity}
-                              onChange={(n) => updateQty(item.product_id, n)}
-                            />
-                          </td>
-                          <td className={`${TD} text-right font-mono font-semibold`}>
-                            ${(item.price * item.quantity).toFixed(2)}
-                          </td>
-                          <td className={`${TD} text-center w-8`}>
-                            <button
-                              onClick={() => removeItem(item.product_id)}
-                              className="text-brand-muted hover:text-[#B83434] transition-colors"
-                              aria-label="Remove item"
-                            >
-                              <X size={13} />
-                            </button>
-                          </td>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr>
+                          <th className={`${TH} hidden sm:table-cell`}>SKU</th>
+                          <th className={TH}>Variant</th>
+                          <th className={`${TH} text-right hidden sm:table-cell`}>Unit price</th>
+                          <th className={`${TH} text-right`}>Qty</th>
+                          <th className={`${TH} text-right`}>Line total</th>
+                          <th className={`${TH} w-8`} />
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {group.items.map((item) => (
+                          <tr key={item.product_id} className="hover:bg-brand-bg/50 transition-colors">
+                            <td className={`${TD} hidden sm:table-cell font-mono text-[11px] text-brand-muted w-28`}>
+                              {item.sku}
+                            </td>
+                            <td className={TD}>
+                              <span className="text-brand-ink">{item.name}</span>
+                            </td>
+                            <td className={`${TD} hidden sm:table-cell text-right font-mono`}>
+                              ${item.price.toFixed(2)}
+                            </td>
+                            <td className={`${TD} text-right`}>
+                              <QtyStepper
+                                value={item.quantity}
+                                onChange={(n) => updateQty(item.product_id, n)}
+                              />
+                            </td>
+                            <td className={`${TD} text-right font-mono font-semibold`}>
+                              ${(item.price * item.quantity).toFixed(2)}
+                            </td>
+                            <td className={`${TD} text-center w-8`}>
+                              <button
+                                onClick={() => removeItem(item.product_id)}
+                                className="text-brand-muted hover:text-[#B83434] transition-colors"
+                                aria-label="Remove item"
+                              >
+                                <X size={13} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               );
             })}
           </div>
 
           {/* Right — Order summary */}
-          <div className="w-[300px] shrink-0 bg-brand-white border border-brand-line">
+          <div className="w-full lg:w-[300px] lg:shrink-0 bg-brand-white border border-brand-line">
             <div className="px-5 py-4 border-b border-brand-ink">
               <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-brand-muted">
                 Order summary
