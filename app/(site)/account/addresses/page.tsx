@@ -51,7 +51,7 @@ function AddressForm({
       onSubmit={(e) => { e.preventDefault(); onSave(form); }}
       className="space-y-4 bg-brand-bg-alt border border-brand-line rounded-[var(--brand-radius)] p-5"
     >
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={LABEL}>First Name *</label>
           <input type="text" value={form.first_name} onChange={set("first_name")} className={INPUT} required maxLength={100} />
@@ -82,7 +82,7 @@ function AddressForm({
         <input type="text" value={form.address_2 ?? ""} onChange={set("address_2")} className={INPUT} maxLength={255} placeholder="Optional" />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={LABEL}>City *</label>
           <input type="text" value={form.city} onChange={set("city")} className={INPUT} required maxLength={100} />
@@ -93,7 +93,7 @@ function AddressForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={LABEL}>Postcode *</label>
           <input type="text" value={form.postcode} onChange={set("postcode")} className={INPUT} required maxLength={20} />
@@ -221,7 +221,7 @@ export default function AddressesPage() {
     return (
       <div className="bg-brand-bg min-h-screen pb-20">
         <PageHeader crumbs={[{ label: "Account", href: "/account/profile" }, { label: "Addresses" }]} title="Manage Addresses" />
-        <div className="px-8 py-8 max-w-2xl mx-auto space-y-4">
+        <div className="px-4 sm:px-6 md:px-8 py-6 md:py-8 max-w-2xl mx-auto space-y-4">
           {[1, 2].map((i) => (
             <div key={i} className="h-36 bg-brand-bg-alt rounded animate-pulse" />
           ))}
@@ -252,7 +252,7 @@ export default function AddressesPage() {
   return (
     <div className="bg-brand-bg min-h-screen pb-20">
       <PageHeader crumbs={[{ label: "Account", href: "/account/profile" }, { label: "Addresses" }]} title="Manage Addresses" />
-      <div className="px-8 py-8 max-w-2xl mx-auto">
+      <div className="px-4 sm:px-6 md:px-8 py-6 md:py-8 max-w-2xl mx-auto">
         {list.length === 0 && !showForm && (
           <p className="font-mono text-[12px] text-brand-muted mb-6">No addresses saved yet.</p>
         )}

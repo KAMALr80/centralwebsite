@@ -83,7 +83,7 @@ function OrdersTable() {
               <th className={TH}>Invoice #</th>
               <th className={TH}>Date</th>
               <th className={TH}>Status</th>
-              <th className={TH}>Payment</th>
+              <th className={`${TH} hidden sm:table-cell`}>Payment</th>
               <th className={`${TH} text-right`}>Total</th>
             </tr>
           </thead>
@@ -108,7 +108,7 @@ function OrdersTable() {
                 <td className={TD}>
                   <StatusBadge status={order.status} />
                 </td>
-                <td className={TD}>
+                <td className={`${TD} hidden sm:table-cell`}>
                   <span
                     className={`font-mono text-[11.5px] capitalize ${PAYMENT_STYLES[order.payment_status] ?? "text-brand-muted"}`}
                   >
@@ -144,7 +144,7 @@ export default function OrdersPage() {
         crumbs={[{ label: "Orders" }]}
         title="Your orders"
       />
-      <div className="px-8 py-6 max-w-5xl mx-auto">
+      <div className="px-4 sm:px-6 md:px-8 py-4 md:py-6 max-w-5xl mx-auto">
         <Suspense>
           <OrdersTable />
         </Suspense>

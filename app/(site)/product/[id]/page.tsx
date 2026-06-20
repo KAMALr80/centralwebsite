@@ -261,7 +261,7 @@ function GroupedVariantTable({ product }: { product: Product }) {
               <th className={`${TH} text-right`}>Price</th>
               <th className={`${TH} text-right`}>Stock</th>
               <th className={`${TH} text-right`}>Qty</th>
-              <th className={`${TH} text-right`}>Line</th>
+              <th className={`${TH} text-right hidden sm:table-cell`}>Line</th>
             </tr>
           </thead>
           <tbody>
@@ -303,7 +303,7 @@ function GroupedVariantTable({ product }: { product: Product }) {
                   <td className={`${TD} text-right`}>
                     <QtyStepper value={qty} onChange={(n) => setQty(child.id, n)} disabled={!child.in_stock} />
                   </td>
-                  <td className={`${TD} text-right font-mono text-brand-ink`}>
+                  <td className={`${TD} text-right font-mono text-brand-ink hidden sm:table-cell`}>
                     {qty > 0 && price > 0 ? `$${(qty * price).toFixed(2)}` : "—"}
                   </td>
                 </tr>
@@ -340,14 +340,14 @@ function SpecStrip({ attributes }: { attributes?: Record<string, string> }) {
 
   return (
     <div className="border-t border-brand-line mt-10">
-      <div className="px-8 py-4 border-b border-brand-line">
+      <div className="px-4 sm:px-6 md:px-8 py-4 border-b border-brand-line">
         <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-brand-muted">
           Product specifications
         </span>
       </div>
-      <div className="grid grid-cols-3 divide-x divide-brand-line">
+      <div className="grid grid-cols-2 md:grid-cols-3 border-l border-brand-line">
         {entries.map(([key, value]) => (
-          <div key={key} className="px-8 py-5 border-b border-brand-line">
+          <div key={key} className="px-4 sm:px-6 md:px-8 py-4 md:py-5 border-b border-r border-brand-line">
             <div className="font-mono text-[10px] tracking-[0.06em] uppercase text-brand-muted mb-1">
               {key}
             </div>
@@ -398,7 +398,7 @@ function ProductDetail({ id }: { id: string }) {
     return (
       <div className="animate-pulse">
         <div className="h-10 bg-brand-bg-alt border-b border-brand-line" />
-        <div className="grid grid-cols-2 gap-8 p-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 p-4 sm:p-6 md:p-8">
           <div className="aspect-[4/3] bg-brand-bg-alt" />
           <div className="space-y-4">
             <div className="h-4 bg-brand-bg-alt rounded w-1/3" />
@@ -435,19 +435,19 @@ function ProductDetail({ id }: { id: string }) {
   return (
     <div className="bg-brand-bg min-h-screen pb-20">
       {/* Breadcrumb */}
-      <div className="px-8 py-3.5 border-b border-brand-line bg-brand-white">
+      <div className="px-4 sm:px-6 md:px-8 py-3.5 border-b border-brand-line bg-brand-white">
         <Breadcrumb items={crumbs} />
       </div>
 
-      {/* Hero */}
-      <div className="grid gap-0 border-b border-brand-line" style={{ gridTemplateColumns: "1fr 1fr" }}>
+      {/* Hero — stacks on mobile, two-column on md+ */}
+      <div className="grid md:grid-cols-2 border-b border-brand-line">
         {/* Left: images */}
-        <div className="p-8 border-r border-brand-line bg-brand-white">
+        <div className="p-4 sm:p-6 md:p-8 md:border-r border-brand-line bg-brand-white">
           <ImageGallery images={images} name={product.name} />
         </div>
 
         {/* Right: summary */}
-        <div className="p-8 bg-brand-white">
+        <div className="p-4 sm:p-6 md:p-8 bg-brand-white border-t md:border-t-0 border-brand-line">
           {/* Brand */}
           {product.brand && (
             <Link
@@ -459,7 +459,7 @@ function ProductDetail({ id }: { id: string }) {
           )}
 
           {/* Name */}
-          <h1 className="font-serif text-[38px] leading-[1.05] font-normal tracking-tight mt-1 text-brand-ink">
+          <h1 className="font-serif text-[26px] sm:text-[32px] md:text-[38px] leading-[1.05] font-normal tracking-tight mt-1 text-brand-ink">
             {product.name}
           </h1>
 
@@ -518,7 +518,7 @@ function ProductDetail({ id }: { id: string }) {
 
       {/* Grouped variant table */}
       {product.type === "grouped" && (
-        <div className="px-8 py-6">
+        <div className="px-4 sm:px-6 md:px-8 py-4 md:py-6">
           <GroupedVariantTable product={product} />
         </div>
       )}

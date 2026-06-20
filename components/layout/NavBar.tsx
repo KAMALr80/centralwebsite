@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ShoppingCart, Search } from "lucide-react";
+import { ShoppingCart, Search, Menu, X } from "lucide-react";
 import { Logo } from "./Logo";
 import { useCart } from "@/context/CartContext";
 
@@ -20,12 +20,14 @@ export function NavBar() {
   const router = useRouter();
   const { itemCount } = useCart();
   const [search, setSearch] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (search.trim()) {
       router.push(`/shop?search=${encodeURIComponent(search.trim())}`);
       setSearch("");
+      setMobileMenuOpen(false);
     }
   }
 
@@ -36,55 +38,115 @@ export function NavBar() {
   }
 
   return (
-    <nav className="bg-brand-bg border-b border-brand-line px-8 py-5 flex items-center gap-10">
-      <Logo />
+    <nav className="bg-brand-bg border-b border-brand-line">
+      {/* Main bar */}
+      <div className="px-4 sm:px-6 md:px-8 py-4 md:py-5 flex items-center gap-4 md:gap-10">
+        <Logo />
 
-      {/* Nav links */}
-      <div className="flex items-center gap-7">
-        {NAV_LINKS.map(({ label, href }) => (
+        {/* Desktop nav links */}
+        <div className="hidden md:flex items-center gap-7">
+          {NAV_LINKS.map(({ label, href }) => (
+            <Link
+              key={label}
+              href={href}
+              className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
+                isActive(href)
+                  ? "text-brand-ink border-brand-orange"
+                  : "text-brand-muted border-transparent hover:text-brand-ink"
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Desktop: Search + Cart */}
+        <div className="hidden md:flex ml-auto items-center gap-4">
+          <form onSubmit={handleSearch} className="relative">
+            <Search
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none"
+            />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search 12,400+ products"
+              className="w-80 h-[38px] pl-8 pr-3 border border-brand-line bg-brand-white text-[13px] text-brand-muted placeholder:text-brand-muted focus:outline-none focus:border-brand-blue rounded-[var(--brand-radius)]"
+            />
+          </form>
           <Link
-            key={label}
-            href={href}
-            className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
-              isActive(href)
-                ? "text-brand-ink border-brand-orange"
-                : "text-brand-muted border-transparent hover:text-brand-ink"
-            }`}
+            href="/cart"
+            className="flex items-center gap-1.5 font-mono text-[11px] tracking-[0.06em] uppercase text-brand-ink hover:text-brand-blue transition-colors"
           >
-            {label}
+            {itemCount > 0 && (
+              <span className="bg-brand-orange text-brand-white text-[10px] font-mono px-1.5 py-0.5 rounded-[var(--brand-radius)] leading-none">
+                {itemCount}
+              </span>
+            )}
+            <ShoppingCart size={16} />
+            CART
           </Link>
-        ))}
+        </div>
+
+        {/* Mobile: Cart + Hamburger */}
+        <div className="md:hidden ml-auto flex items-center gap-4">
+          <Link
+            href="/cart"
+            className="relative flex items-center text-brand-ink"
+            aria-label="Cart"
+          >
+            {itemCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-brand-orange text-brand-white text-[9px] font-mono min-w-[16px] h-4 flex items-center justify-center rounded-full leading-none px-1">
+                {itemCount}
+              </span>
+            )}
+            <ShoppingCart size={20} />
+          </Link>
+          <button
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            className="text-brand-ink"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
-      {/* Search + Cart */}
-      <div className="ml-auto flex items-center gap-4">
-        <form onSubmit={handleSearch} className="relative">
-          <Search
-            size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none"
-          />
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search 12,400+ products"
-            className="w-80 h-[38px] pl-8 pr-3 border border-brand-line bg-brand-white text-[13px] text-brand-muted placeholder:text-brand-muted focus:outline-none focus:border-brand-blue rounded-[var(--brand-radius)]"
-          />
-        </form>
-
-        <Link
-          href="/cart"
-          className="flex items-center gap-1.5 font-mono text-[11px] tracking-[0.06em] uppercase text-brand-ink hover:text-brand-blue transition-colors"
-        >
-          {itemCount > 0 && (
-            <span className="bg-brand-orange text-brand-white text-[10px] font-mono px-1.5 py-0.5 rounded-[var(--brand-radius)] leading-none">
-              {itemCount}
-            </span>
-          )}
-          <ShoppingCart size={16} />
-          CART
-        </Link>
-      </div>
+      {/* Mobile dropdown menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-brand-line bg-brand-bg">
+          <div className="px-4 pt-3 pb-2">
+            <form onSubmit={handleSearch} className="relative">
+              <Search
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none"
+              />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search products…"
+                className="w-full h-[38px] pl-8 pr-3 border border-brand-line bg-brand-white text-[13px] text-brand-muted placeholder:text-brand-muted focus:outline-none focus:border-brand-blue rounded-[var(--brand-radius)]"
+              />
+            </form>
+          </div>
+          <div className="px-4 pb-4 flex flex-col">
+            {NAV_LINKS.map(({ label, href }) => (
+              <Link
+                key={label}
+                href={href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`py-3 text-[14px] font-medium border-b border-brand-line last:border-0 transition-colors ${
+                  isActive(href) ? "text-brand-ink" : "text-brand-muted hover:text-brand-ink"
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

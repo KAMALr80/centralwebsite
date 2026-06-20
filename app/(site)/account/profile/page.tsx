@@ -48,7 +48,7 @@ export default function EditProfilePage() {
   return (
     <div className="bg-brand-bg min-h-screen pb-20">
       <PageHeader crumbs={[{ label: "Account", href: "/account/profile" }, { label: "Edit Profile" }]} title="Edit Profile" />
-      <div className="px-8 py-8 max-w-lg mx-auto">
+      <div className="px-4 sm:px-6 md:px-8 py-6 md:py-8 max-w-lg mx-auto">
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className={LABEL}>Full Name</label>

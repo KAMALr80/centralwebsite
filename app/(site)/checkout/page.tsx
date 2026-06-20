@@ -22,7 +22,7 @@ function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
         const done = n < step;
         return (
           <div key={label} className="flex items-center">
-            <div className="flex items-center gap-2 px-4 py-2.5">
+            <div className="flex items-center gap-2 px-2 sm:px-4 py-2.5">
               <span
                 className={`w-5 h-5 rounded-full flex items-center justify-center font-mono text-[10px] shrink-0 ${
                   active
@@ -35,7 +35,7 @@ function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
                 {done ? "✓" : n}
               </span>
               <span
-                className={`font-mono text-[10.5px] tracking-[0.06em] uppercase ${
+                className={`hidden sm:inline font-mono text-[10.5px] tracking-[0.06em] uppercase ${
                   active ? "text-brand-ink" : "text-brand-muted"
                 }`}
               >
@@ -146,7 +146,7 @@ function AddressSelector({
         <p className="font-mono text-[12px] text-brand-muted mb-3">No saved addresses.</p>
       )}
 
-      <div className="grid grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
         {addresses.map((addr) => (
           <AddressCard
             key={addr.id}
@@ -444,16 +444,16 @@ export default function CheckoutPage() {
   return (
     <div className="bg-brand-bg min-h-screen pb-20">
       {/* Page header */}
-      <div className="px-8 py-5 border-b border-brand-line bg-brand-white">
-        <div className="flex items-start justify-between">
-          <h1 className="font-serif text-[36px] font-normal text-brand-ink leading-none">
+      <div className="px-4 sm:px-6 md:px-8 py-4 md:py-5 border-b border-brand-line bg-brand-white">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <h1 className="font-serif text-[26px] sm:text-[30px] md:text-[36px] font-normal text-brand-ink leading-none">
             Checkout
           </h1>
           <StepIndicator step={2} />
         </div>
       </div>
 
-      <div className="px-8 py-6 flex gap-6 max-w-[1400px] mx-auto items-start">
+      <div className="px-4 sm:px-6 md:px-8 py-4 md:py-6 flex flex-col lg:flex-row gap-6 max-w-[1400px] mx-auto items-start">
         {/* Left — form sections */}
         <div className="flex-1 min-w-0 space-y-8">
           {/* Billing address */}
@@ -515,36 +515,38 @@ export default function CheckoutPage() {
                 ← Edit in cart
               </Link>
             </div>
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className={TH}>Product</th>
-                  <th className={`${TH} text-right w-16`}>Qty</th>
-                  <th className={`${TH} text-right w-24`}>Unit price</th>
-                  <th className={`${TH} text-right w-24`}>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item) => (
-                  <tr key={item.product_id}>
-                    <td className={TD}>
-                      <div className="text-brand-ink">{item.name}</div>
-                      <div className="font-mono text-[10.5px] text-brand-muted">{item.sku}</div>
-                    </td>
-                    <td className={`${TD} text-right font-mono`}>{item.quantity}</td>
-                    <td className={`${TD} text-right font-mono`}>${item.price.toFixed(2)}</td>
-                    <td className={`${TD} text-right font-mono font-semibold`}>
-                      ${(item.price * item.quantity).toFixed(2)}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className={TH}>Product</th>
+                    <th className={`${TH} text-right w-16`}>Qty</th>
+                    <th className={`${TH} text-right w-24 hidden sm:table-cell`}>Unit price</th>
+                    <th className={`${TH} text-right w-24`}>Total</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {items.map((item) => (
+                    <tr key={item.product_id}>
+                      <td className={TD}>
+                        <div className="text-brand-ink">{item.name}</div>
+                        <div className="font-mono text-[10.5px] text-brand-muted">{item.sku}</div>
+                      </td>
+                      <td className={`${TD} text-right font-mono`}>{item.quantity}</td>
+                      <td className={`${TD} text-right font-mono hidden sm:table-cell`}>${item.price.toFixed(2)}</td>
+                      <td className={`${TD} text-right font-mono font-semibold`}>
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
         </div>
 
         {/* Right — summary */}
-        <div className="w-[300px] shrink-0 bg-brand-white border border-brand-line">
+        <div className="w-full lg:w-[300px] lg:shrink-0 bg-brand-white border border-brand-line">
           <div className="px-5 py-4 border-b border-brand-ink">
             <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-brand-muted">
               Order summary

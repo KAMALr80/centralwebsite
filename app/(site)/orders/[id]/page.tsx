@@ -49,7 +49,7 @@ function StatusTracker({ status }: { status: OrderStatus }) {
         const active = i === activeIndex;
         return (
           <div key={step} className="flex items-center">
-            <div className="flex flex-col items-center gap-1 px-4">
+            <div className="flex flex-col items-center gap-1 px-2 sm:px-4">
               <span
                 className={`w-5 h-5 rounded-full flex items-center justify-center font-mono text-[10px] shrink-0 ${
                   done
@@ -62,7 +62,7 @@ function StatusTracker({ status }: { status: OrderStatus }) {
                 {done ? "✓" : i + 1}
               </span>
               <span
-                className={`font-mono text-[9.5px] tracking-[0.06em] uppercase ${
+                className={`hidden sm:inline font-mono text-[9.5px] tracking-[0.06em] uppercase ${
                   active ? "text-brand-ink" : done ? "text-brand-ink" : "text-brand-muted"
                 }`}
               >
@@ -71,7 +71,7 @@ function StatusTracker({ status }: { status: OrderStatus }) {
             </div>
             {i < STATUS_STEPS.length - 1 && (
               <span
-                className={`w-8 h-px ${
+                className={`w-6 sm:w-8 h-px ${
                   i < activeIndex ? "bg-brand-navy" : "bg-brand-line"
                 }`}
               />
@@ -107,7 +107,7 @@ function OrderDetail({ id }: { id: string }) {
 
   if (isLoading) {
     return (
-      <div className="animate-pulse space-y-4 p-8">
+      <div className="animate-pulse space-y-4 p-4 sm:p-6 md:p-8">
         <div className="h-6 bg-brand-bg-alt rounded w-1/4" />
         <div className="h-4 bg-brand-bg-alt rounded w-1/3" />
         <div className="h-32 bg-brand-bg-alt rounded" />
@@ -132,7 +132,7 @@ function OrderDetail({ id }: { id: string }) {
   return (
     <div className="bg-brand-bg min-h-screen pb-20">
       {/* Breadcrumb */}
-      <div className="px-8 py-3.5 border-b border-brand-line bg-brand-white">
+      <div className="px-4 sm:px-6 md:px-8 py-3.5 border-b border-brand-line bg-brand-white">
         <Breadcrumb
           items={[
             { label: "Orders", href: "/orders" },
@@ -142,9 +142,9 @@ function OrderDetail({ id }: { id: string }) {
       </div>
 
       {/* Order header */}
-      <div className="px-8 py-6 border-b border-brand-line bg-brand-white flex items-start justify-between gap-6">
+      <div className="px-4 sm:px-6 md:px-8 py-4 md:py-6 border-b border-brand-line bg-brand-white flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
         <div>
-          <h1 className="font-serif text-[36px] font-normal text-brand-ink leading-none">
+          <h1 className="font-serif text-[26px] sm:text-[30px] md:text-[36px] font-normal text-brand-ink leading-none">
             {order.invoice_no}
           </h1>
           <div className="mt-2 flex items-center gap-3">
@@ -161,9 +161,9 @@ function OrderDetail({ id }: { id: string }) {
         <StatusTracker status={order.status} />
       </div>
 
-      <div className="px-8 py-6 max-w-5xl mx-auto space-y-6">
+      <div className="px-4 sm:px-6 md:px-8 py-4 md:py-6 max-w-5xl mx-auto space-y-6">
         {/* Addresses */}
-        <div className="bg-brand-white border border-brand-line p-6 grid grid-cols-2 gap-6">
+        <div className="bg-brand-white border border-brand-line p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
           <AddressBlock
             label="Billing address"
             fields={[
@@ -195,31 +195,33 @@ function OrderDetail({ id }: { id: string }) {
               Line items
             </span>
           </div>
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th className={TH}>Product</th>
-                <th className={`${TH} text-right w-16`}>Qty</th>
-                <th className={`${TH} text-right w-24`}>Unit price</th>
-                <th className={`${TH} text-right w-24`}>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(order.items ?? []).map((line) => (
-                <tr key={line.id} className="hover:bg-brand-bg/50 transition-colors">
-                  <td className={TD}>
-                    <div className="text-brand-ink">{line.name}</div>
-                    <div className="font-mono text-[10.5px] text-brand-muted">{line.sku}</div>
-                  </td>
-                  <td className={`${TD} text-right font-mono`}>{line.quantity}</td>
-                  <td className={`${TD} text-right font-mono`}>${line.unit_price.toFixed(2)}</td>
-                  <td className={`${TD} text-right font-mono font-semibold`}>
-                    ${line.total.toFixed(2)}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className={TH}>Product</th>
+                  <th className={`${TH} text-right w-16`}>Qty</th>
+                  <th className={`${TH} text-right w-24 hidden sm:table-cell`}>Unit price</th>
+                  <th className={`${TH} text-right w-24`}>Total</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {(order.items ?? []).map((line) => (
+                  <tr key={line.id} className="hover:bg-brand-bg/50 transition-colors">
+                    <td className={TD}>
+                      <div className="text-brand-ink">{line.name}</div>
+                      <div className="font-mono text-[10.5px] text-brand-muted">{line.sku}</div>
+                    </td>
+                    <td className={`${TD} text-right font-mono`}>{line.quantity}</td>
+                    <td className={`${TD} text-right font-mono hidden sm:table-cell`}>${line.unit_price.toFixed(2)}</td>
+                    <td className={`${TD} text-right font-mono font-semibold`}>
+                      ${line.total.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {/* Totals */}
           <div className="px-5 py-4 border-t border-brand-ink space-y-2 max-w-xs ml-auto">

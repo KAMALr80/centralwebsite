@@ -47,9 +47,9 @@ function Placeholder({
 // ── Section A — Hero ─────────────────────────────────────────────
 function HeroSection() {
   return (
-    <div className="grid border-b border-brand-line" style={{ gridTemplateColumns: "1.1fr 1fr" }}>
+    <div className="grid md:grid-cols-[1.1fr_1fr] border-b border-brand-line">
       {/* Left — copy */}
-      <div className="px-16 py-20 relative">
+      <div className="px-4 sm:px-8 md:px-16 py-10 sm:py-14 md:py-20 relative">
         {/* Eyebrow */}
         <div className="flex items-center gap-3 font-mono text-[11px] tracking-[0.12em] uppercase text-brand-orange mb-7">
           <span className="w-6 h-px bg-brand-orange shrink-0" />
@@ -57,7 +57,7 @@ function HeroSection() {
         </div>
 
         {/* Headline */}
-        <h1 className="font-serif text-[82px] leading-[0.96] text-brand-ink m-0 tracking-[-0.02em] font-normal">
+        <h1 className="font-serif text-[42px] sm:text-[58px] md:text-[82px] leading-[0.96] text-brand-ink m-0 tracking-[-0.02em] font-normal">
           The wholesale
           <br />
           <em className="text-brand-blue not-italic">back-of-house</em>
@@ -66,37 +66,37 @@ function HeroSection() {
         </h1>
 
         {/* Sub-copy */}
-        <p className="text-[17px] leading-[1.55] text-brand-muted max-w-[480px] mt-8">
+        <p className="text-[15px] sm:text-[17px] leading-[1.55] text-brand-muted max-w-[480px] mt-6 md:mt-8">
           Six hundred vetted brands. One purchase order. Sixty-day terms.
           Stock your shelves without stocking your spreadsheet.
         </p>
 
         {/* CTAs */}
-        <div className="flex gap-3 mt-9">
+        <div className="flex flex-col sm:flex-row gap-3 mt-7 md:mt-9">
           <Link
             href="/register"
-            className="flex items-center gap-2.5 bg-brand-ink text-brand-white px-7 py-4 text-[14px] font-medium rounded-[var(--brand-radius)] hover:bg-brand-navy transition-colors no-underline"
+            className="flex items-center justify-center gap-2.5 bg-brand-ink text-brand-white px-7 py-4 text-[14px] font-medium rounded-[var(--brand-radius)] hover:bg-brand-navy transition-colors no-underline"
           >
             Apply for a buyer account
             <ArrowRight size={14} className="text-brand-orange" />
           </Link>
           <Link
             href="/shop"
-            className="flex items-center px-6 py-4 text-[14px] font-medium text-brand-ink border border-brand-ink rounded-[var(--brand-radius)] hover:bg-brand-ink hover:text-brand-white transition-colors no-underline"
+            className="flex items-center justify-center px-6 py-4 text-[14px] font-medium text-brand-ink border border-brand-ink rounded-[var(--brand-radius)] hover:bg-brand-ink hover:text-brand-white transition-colors no-underline"
           >
             Browse the catalog
           </Link>
         </div>
 
         {/* Stat strip */}
-        <div className="mt-18 pt-7 border-t border-brand-line grid grid-cols-3" style={{ marginTop: "4.5rem" }}>
+        <div className="pt-7 border-t border-brand-line grid grid-cols-3" style={{ marginTop: "4.5rem" }}>
           {[
             { n: "612", l: "Vetted brands" },
             { n: "12.4k", l: "SKUs in stock" },
             { n: "Net-60", l: "Standard terms" },
           ].map((s) => (
             <div key={s.l}>
-              <div className="font-serif text-[44px] text-brand-navy leading-none font-normal">
+              <div className="font-serif text-[30px] sm:text-[38px] md:text-[44px] text-brand-navy leading-none font-normal">
                 {s.n}
               </div>
               <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-muted mt-2">
@@ -108,18 +108,18 @@ function HeroSection() {
       </div>
 
       {/* Right — imagery composition */}
-      <div className="bg-brand-bg-alt relative min-h-[680px]">
-        <div className="absolute inset-12">
+      <div className="bg-brand-bg-alt relative min-h-[280px] sm:min-h-[420px] md:min-h-[680px]">
+        <div className="absolute inset-6 md:inset-12">
           <Placeholder label="Lifestyle · workshop scene" tone="warm" className="h-full" />
         </div>
 
         {/* "This week's drop" blue card */}
-        <div className="absolute bottom-12 left-12 right-40 bg-brand-blue text-white p-6 flex items-center justify-between">
+        <div className="absolute bottom-6 left-6 right-24 md:bottom-12 md:left-12 md:right-40 bg-brand-blue text-white p-4 md:p-6 flex items-center justify-between">
           <div>
             <div className="font-mono text-[10px] tracking-[0.08em] uppercase opacity-70 mb-1">
               This week&apos;s drop
             </div>
-            <div className="text-[18px] font-medium">
+            <div className="text-[14px] md:text-[18px] font-medium">
               Hudson Falls Pottery — 14 new stoneware pieces
             </div>
           </div>
@@ -127,10 +127,10 @@ function HeroSection() {
         </div>
 
         {/* "Opening order $150" orange badge */}
-        <div className="absolute top-12 right-12 w-[140px] h-[140px] bg-brand-orange text-white flex flex-col justify-center p-4 font-mono">
-          <div className="text-[10px] tracking-[0.1em] opacity-85">OPENING ORDER</div>
-          <div className="font-serif text-[36px] leading-none mt-1.5">$150</div>
-          <div className="text-[10px] tracking-[0.06em] mt-1">FOR ALL BRANDS</div>
+        <div className="absolute top-6 right-6 w-[100px] h-[100px] md:top-12 md:right-12 md:w-[140px] md:h-[140px] bg-brand-orange text-white flex flex-col justify-center p-3 md:p-4 font-mono">
+          <div className="text-[9px] md:text-[10px] tracking-[0.1em] opacity-85">OPENING ORDER</div>
+          <div className="font-serif text-[26px] md:text-[36px] leading-none mt-1.5">$150</div>
+          <div className="text-[9px] md:text-[10px] tracking-[0.06em] mt-1">FOR ALL BRANDS</div>
         </div>
       </div>
     </div>
@@ -149,14 +149,14 @@ function CategoryGrid() {
   const displayed = topLevel.slice(0, 8);
 
   return (
-    <section className="px-16 py-18" style={{ paddingTop: "4.5rem", paddingBottom: "3.5rem" }}>
+    <section className="px-4 sm:px-8 md:px-16" style={{ paddingTop: "4.5rem", paddingBottom: "3.5rem" }}>
       {/* Section header */}
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex flex-wrap justify-between items-end gap-3 mb-8">
         <div>
           <div className="font-mono text-[11px] tracking-[0.1em] uppercase text-brand-muted mb-2">
             SECTION 01 · DEPARTMENTS
           </div>
-          <h2 className="font-serif text-[44px] text-brand-ink font-normal tracking-tight m-0">
+          <h2 className="font-serif text-[28px] sm:text-[36px] md:text-[44px] text-brand-ink font-normal tracking-tight m-0">
             Stock the entire store.
           </h2>
         </div>
@@ -169,7 +169,7 @@ function CategoryGrid() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {isLoading
           ? Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="bg-brand-white border border-brand-line animate-pulse">
@@ -226,14 +226,14 @@ function FeaturedBrands() {
   const displayed = (brands ?? []).slice(0, 3);
 
   return (
-    <section className="px-16 bg-brand-bg-alt" style={{ paddingTop: "2.5rem", paddingBottom: "4.5rem" }}>
+    <section className="px-4 sm:px-8 md:px-16 bg-brand-bg-alt" style={{ paddingTop: "2.5rem", paddingBottom: "4.5rem" }}>
       {/* Section header */}
       <div className="pt-10 mb-8">
         <div className="font-mono text-[11px] tracking-[0.1em] uppercase text-brand-muted mb-2">
           SECTION 02 · MAKERS
         </div>
-        <div className="flex justify-between items-end">
-          <h2 className="font-serif text-[44px] text-brand-ink font-normal tracking-tight m-0 max-w-[600px]">
+        <div className="flex flex-wrap justify-between items-end gap-3">
+          <h2 className="font-serif text-[28px] sm:text-[36px] md:text-[44px] text-brand-ink font-normal tracking-tight m-0 max-w-[600px]">
             Brands worth introducing your customers to.
           </h2>
           <span className="font-mono text-[11px] tracking-[0.06em] text-brand-muted uppercase">
@@ -244,7 +244,7 @@ function FeaturedBrands() {
 
       {/* 3-column editorial grid */}
       {isLoading ? (
-        <div className="grid gap-4" style={{ gridTemplateColumns: "1.6fr 1fr 1fr" }}>
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr]">
           {[0, 1, 2].map((i) => (
             <div key={i} className="bg-brand-white border border-brand-line animate-pulse">
               <div className={i === 0 ? "aspect-[16/11]" : "aspect-[4/3]"} style={{ background: "#E5DFD0" }} />
@@ -257,7 +257,7 @@ function FeaturedBrands() {
           ))}
         </div>
       ) : (
-        <div className="grid gap-4" style={{ gridTemplateColumns: "1.6fr 1fr 1fr" }}>
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr]">
           {/* Spotlight — first brand */}
           {displayed[0] && (
             <Link
@@ -389,28 +389,27 @@ const VALUE_PROPS = [
 
 function ValueProps() {
   return (
-    <section className="px-16 py-22 bg-brand-navy text-white" style={{ paddingTop: "5.5rem", paddingBottom: "5.5rem" }}>
+    <section className="px-4 sm:px-8 md:px-16 bg-brand-navy text-white" style={{ paddingTop: "5.5rem", paddingBottom: "5.5rem" }}>
       <div className="font-mono text-[11px] tracking-[0.1em] uppercase text-brand-orange mb-2">
         SECTION 03 · THE FORGE PROMISE
       </div>
-      <h2 className="font-serif text-[44px] font-normal tracking-tight max-w-[720px] text-white m-0 mb-14">
+      <h2 className="font-serif text-[28px] sm:text-[36px] md:text-[44px] font-normal tracking-tight max-w-[720px] text-white m-0 mb-8 md:mb-14">
         Three rules we don&apos;t bend on.
       </h2>
 
       <div
-        className="grid mt-0"
+        className="grid mt-0 grid-cols-1 md:grid-cols-3"
         style={{
-          gridTemplateColumns: "repeat(3, 1fr)",
           gap: "1px",
           background: "#1E3358",
         }}
       >
         {VALUE_PROPS.map((r) => (
-          <div key={r.n} className="bg-brand-navy px-7 py-8">
-            <div className="font-serif text-[56px] text-brand-orange leading-none italic">
+          <div key={r.n} className="bg-brand-navy px-5 sm:px-7 py-6 sm:py-8">
+            <div className="font-serif text-[44px] sm:text-[56px] text-brand-orange leading-none italic">
               {r.n}
             </div>
-            <div className="font-serif text-[26px] mt-4 font-normal leading-[1.15] text-white">
+            <div className="font-serif text-[22px] sm:text-[26px] mt-4 font-normal leading-[1.15] text-white">
               {r.h}
             </div>
             <p className="text-[14px] leading-[1.6] text-[#9DAAC2] mt-3.5">{r.b}</p>
