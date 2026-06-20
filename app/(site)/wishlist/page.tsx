@@ -59,9 +59,9 @@ function WishlistTable() {
           <tr>
             <th className={`${TH} w-14`} />
             <th className={TH}>Product</th>
-            <th className={TH}>SKU</th>
+            <th className={`${TH} hidden sm:table-cell`}>SKU</th>
             <th className={TH}>Stock</th>
-            <th className={TH}>Added</th>
+            <th className={`${TH} hidden sm:table-cell`}>Added</th>
             <th className={TH}>Price</th>
             <th className={`${TH} w-10`} />
           </tr>
@@ -102,7 +102,7 @@ function WishlistTable() {
               </td>
 
               {/* SKU */}
-              <td className={`${TD} font-mono text-[11.5px] text-brand-muted`}>
+              <td className={`${TD} font-mono text-[11.5px] text-brand-muted hidden sm:table-cell`}>
                 {item.sku}
               </td>
 
@@ -112,7 +112,7 @@ function WishlistTable() {
               </td>
 
               {/* Added date */}
-              <td className={`${TD} font-mono text-[11.5px] text-brand-muted`}>
+              <td className={`${TD} font-mono text-[11.5px] text-brand-muted hidden sm:table-cell`}>
                 {new Date(item.added_at).toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
@@ -155,7 +155,7 @@ export default function WishlistPage() {
         crumbs={[{ label: "Wishlist" }]}
         title="Wishlist"
       />
-      <div className="px-8 py-6 max-w-5xl mx-auto">
+      <div className="px-4 sm:px-6 md:px-8 py-4 md:py-6 max-w-5xl mx-auto">
         <Suspense>
           <WishlistTable />
         </Suspense>

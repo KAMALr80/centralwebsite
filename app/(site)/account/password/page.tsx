@@ -62,7 +62,7 @@ export default function ChangePasswordPage() {
         crumbs={[{ label: "Account", href: "/account/profile" }, { label: "Change Password" }]}
         title="Change Password"
       />
-      <div className="px-8 py-8 max-w-lg mx-auto">
+      <div className="px-4 sm:px-6 md:px-8 py-6 md:py-8 max-w-lg mx-auto">
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className={LABEL}>Current Password</label>
