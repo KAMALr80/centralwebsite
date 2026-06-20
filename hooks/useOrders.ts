@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
 export type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-export type PaymentStatus = "due" | "paid" | "refunded";
+export type PaymentStatus = "due" | "partial" | "paid" | "refunded";
 
 export interface OrderAddress {
   name: string;

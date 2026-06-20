@@ -16,7 +16,7 @@ const STATUS_STYLES: Record<OrderStatus, string> = {
 };
 
 const PAYMENT_STYLES: Record<PaymentStatus, string> = {
-  unpaid: "text-brand-muted",
+  due: "text-brand-muted",
   paid: "text-[#065F46]",
   partial: "text-brand-orange",
   refunded: "text-[#1D4ED8]",
