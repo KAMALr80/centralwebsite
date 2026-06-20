@@ -61,6 +61,7 @@ export function BrowseLayout({
   // Local state
   const [qtyMap, setQtyMap] = useState<Record<number, number>>({});
   const [brandSearch, setBrandSearch] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [view, setView] = useState<"list" | "grid">(() => {
     if (typeof window === "undefined") return "list";
     return (localStorage.getItem("fastweb_view") as "list" | "grid") ?? "list";
@@ -189,6 +190,112 @@ export function BrowseLayout({
     : undefined;
   const activeSubCatName = sidebarSubCats.find((sc) => sc.id === subCatId)?.name;
 
+  // ── Filter sections (shared between sidebar and mobile drawer) ─────────────
+
+  function renderFilterSections() {
+    return (
+      <>
+        {/* In stock */}
+        <div className="mb-4 pb-4 border-b border-brand-line">
+          <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-ink mb-2">
+            Stock
+          </div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={inStock}
+              onChange={(e) => setParam("in_stock", e.target.checked ? "true" : null)}
+              className="w-3 h-3 accent-brand-blue"
+            />
+            <span>In stock now</span>
+          </label>
+        </div>
+
+        {/* Brand filter */}
+        {!brandId && (
+          <div className="mb-4 pb-4 border-b border-brand-line">
+            <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-ink mb-2 flex justify-between">
+              <span>Brand</span>
+              {activeBrandIds.length > 0 && (
+                <span className="text-brand-muted">{activeBrandIds.length} selected</span>
+              )}
+            </div>
+            <input
+              type="text"
+              value={brandSearch}
+              onChange={(e) => setBrandSearch(e.target.value)}
+              placeholder="Search brands…"
+              className="w-full h-7 px-2 mb-2 border border-brand-line text-[11.5px] bg-brand-white focus:outline-none focus:border-brand-blue rounded-[var(--brand-radius)] placeholder:text-brand-muted"
+            />
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              {filteredBrands.length === 0 ? (
+                <p className="text-[11.5px] text-brand-muted">No brands found</p>
+              ) : (
+                filteredBrands.map((b) => (
+                  <label key={b.id} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={activeBrandIds.includes(b.id)}
+                      onChange={() => toggleBrand(b.id)}
+                      className="w-3 h-3 accent-brand-blue shrink-0"
+                    />
+                    <span className="text-[12px] text-brand-ink truncate">{b.name}</span>
+                  </label>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Category filter — hidden on fixed category pages */}
+        {!categoryId && (
+          <div className="mb-4 pb-4 border-b border-brand-line">
+            <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-ink mb-2">
+              Category
+            </div>
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              {(allCategories ?? []).slice().sort((a, b) => a.name.localeCompare(b.name)).map((cat) => (
+                <label key={cat.id} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={catId === cat.id}
+                    onChange={() => toggleCategory(cat.id)}
+                    className="w-3 h-3 accent-brand-blue shrink-0"
+                  />
+                  <span className="text-[12px] text-brand-ink truncate">{cat.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Sub-category filter — shown when parent has children */}
+        {sidebarSubCats.length > 0 && (
+          <div className="mb-4 pb-4 border-b border-brand-line">
+            <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-ink mb-2">
+              Sub-category
+            </div>
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              {sidebarSubCats.map((sc) => (
+                <label key={sc.id} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={subCatId === sc.id}
+                    onChange={() =>
+                      setParam("sub_cat", subCatId === sc.id ? null : String(sc.id))
+                    }
+                    className="w-3 h-3 accent-brand-blue shrink-0"
+                  />
+                  <span className="text-[12px] text-brand-ink truncate">{sc.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="bg-brand-bg min-h-screen pb-20">
       <PageHeader
@@ -204,7 +311,7 @@ export function BrowseLayout({
 
       {/* Sub-category pills — category pages only */}
       {subCategories.length > 0 && (
-        <div className="px-8 py-3 border-b border-brand-line bg-brand-white flex items-center gap-2 flex-wrap">
+        <div className="px-4 sm:px-6 md:px-8 py-3 border-b border-brand-line bg-brand-white flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setParam("sub_cat", null)}
             className={`px-3 py-1 text-[11.5px] border rounded-[var(--brand-radius)] transition-colors ${
@@ -234,9 +341,9 @@ export function BrowseLayout({
         </div>
       )}
 
-      <div className="flex px-8 pt-4 gap-6 max-w-[1600px] mx-auto">
-        {/* ── Filters sidebar ──────────────────────────────── */}
-        <aside className="w-[220px] shrink-0 text-[12.5px]">
+      <div className="flex px-4 sm:px-6 md:px-8 pt-4 gap-6 max-w-[1600px] mx-auto">
+        {/* ── Desktop filters sidebar (hidden on mobile/tablet) ──────────── */}
+        <aside className="hidden lg:block w-[220px] shrink-0 text-[12.5px]">
           <div className="flex items-center justify-between pb-2 border-b border-brand-ink mb-3">
             <span className="font-mono text-[10px] tracking-[0.08em] uppercase flex items-center gap-1.5">
               <SlidersHorizontal size={11} />
@@ -251,113 +358,24 @@ export function BrowseLayout({
               </button>
             )}
           </div>
-
-          {/* In stock */}
-          <div className="mb-4 pb-4 border-b border-brand-line">
-            <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-ink mb-2">
-              Stock
-            </div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={inStock}
-                onChange={(e) => setParam("in_stock", e.target.checked ? "true" : null)}
-                className="w-3 h-3 accent-brand-blue"
-              />
-              <span>In stock now</span>
-            </label>
-          </div>
-
-          {/* Brand filter */}
-          {!brandId && (
-            <div className="mb-4 pb-4 border-b border-brand-line">
-              <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-ink mb-2 flex justify-between">
-                <span>Brand</span>
-                {activeBrandIds.length > 0 && (
-                  <span className="text-brand-muted">{activeBrandIds.length} selected</span>
-                )}
-              </div>
-              <input
-                type="text"
-                value={brandSearch}
-                onChange={(e) => setBrandSearch(e.target.value)}
-                placeholder="Search brands…"
-                className="w-full h-7 px-2 mb-2 border border-brand-line text-[11.5px] bg-brand-white focus:outline-none focus:border-brand-blue rounded-[var(--brand-radius)] placeholder:text-brand-muted"
-              />
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                {filteredBrands.length === 0 ? (
-                  <p className="text-[11.5px] text-brand-muted">No brands found</p>
-                ) : (
-                  filteredBrands.map((b) => (
-                    <label key={b.id} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={activeBrandIds.includes(b.id)}
-                        onChange={() => toggleBrand(b.id)}
-                        className="w-3 h-3 accent-brand-blue shrink-0"
-                      />
-                      <span className="text-[12px] text-brand-ink truncate">{b.name}</span>
-                    </label>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Category filter — hidden on fixed category pages */}
-          {!categoryId && (
-            <div className="mb-4 pb-4 border-b border-brand-line">
-              <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-ink mb-2">
-                Category
-              </div>
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                {(allCategories ?? []).slice().sort((a, b) => a.name.localeCompare(b.name)).map((cat) => (
-                  <label key={cat.id} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={catId === cat.id}
-                      onChange={() => toggleCategory(cat.id)}
-                      className="w-3 h-3 accent-brand-blue shrink-0"
-                    />
-                    <span className="text-[12px] text-brand-ink truncate">{cat.name}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Sub-category filter — shown when parent has children */}
-          {sidebarSubCats.length > 0 && (
-            <div className="mb-4 pb-4 border-b border-brand-line">
-              <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-ink mb-2">
-                Sub-category
-              </div>
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                {sidebarSubCats.map((sc) => (
-                  <label key={sc.id} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={subCatId === sc.id}
-                      onChange={() =>
-                        setParam("sub_cat", subCatId === sc.id ? null : String(sc.id))
-                      }
-                      className="w-3 h-3 accent-brand-blue shrink-0"
-                    />
-                    <span className="text-[12px] text-brand-ink truncate">{sc.name}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-
+          {renderFilterSections()}
         </aside>
 
         {/* ── Main: toolbar + table + pagination ─────────── */}
         <main className="flex-1 min-w-0">
-          <div className="flex items-center justify-between py-2.5 border-b border-brand-ink mb-0">
-            <div className="flex items-center gap-3 font-mono text-[11px] tracking-[0.04em] text-brand-muted uppercase flex-wrap">
+          <div className="flex items-center justify-between py-2.5 border-b border-brand-ink mb-0 gap-2 flex-wrap">
+            <div className="flex items-center gap-2 sm:gap-3 font-mono text-[11px] tracking-[0.04em] text-brand-muted uppercase flex-wrap">
+              {/* Mobile filter trigger — hidden on desktop where sidebar is visible */}
+              <button
+                onClick={() => setFiltersOpen(true)}
+                className="lg:hidden flex items-center gap-1.5 px-2.5 py-1 border border-brand-line bg-brand-white text-brand-ink text-[11px] normal-case tracking-normal rounded-[var(--brand-radius)] hover:border-brand-ink font-mono"
+              >
+                <SlidersHorizontal size={12} />
+                Filters{activeFilterCount > 0 && ` (${activeFilterCount})`}
+              </button>
+
               {meta && (
-                <span>
+                <span className="hidden sm:inline">
                   <span className="text-brand-ink">{meta.total.toLocaleString()} SKUs</span>
                   {meta.from && meta.to && ` · ${meta.from}–${meta.to}`}
                 </span>
@@ -400,7 +418,7 @@ export function BrowseLayout({
               )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <div className="flex items-center border border-brand-line rounded-[var(--brand-radius)] overflow-hidden">
                 <button
                   onClick={() => switchView("list")}
@@ -426,7 +444,7 @@ export function BrowseLayout({
                 </button>
               </div>
 
-              <span className="font-mono text-[10px] tracking-[0.06em] uppercase text-brand-muted">
+              <span className="hidden sm:inline font-mono text-[10px] tracking-[0.06em] uppercase text-brand-muted">
                 SORT
               </span>
               <select
@@ -472,6 +490,54 @@ export function BrowseLayout({
           )}
         </main>
       </div>
+
+      {/* ── Mobile filter drawer ────────────────────────────────────────────── */}
+      {filtersOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setFiltersOpen(false)}
+          />
+          {/* Panel */}
+          <div className="relative w-[300px] max-w-[85vw] bg-brand-white flex flex-col h-full shadow-xl">
+            <div className="px-4 pt-4 pb-3 border-b border-brand-line flex items-center justify-between shrink-0">
+              <span className="font-mono text-[10px] tracking-[0.08em] uppercase flex items-center gap-1.5 text-brand-ink">
+                <SlidersHorizontal size={11} />
+                FILTERS{activeFilterCount > 0 && ` · ${activeFilterCount}`}
+              </span>
+              <div className="flex items-center gap-3">
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={clearAll}
+                    className="text-[11px] text-brand-orange hover:text-brand-ink transition-colors"
+                  >
+                    Clear all
+                  </button>
+                )}
+                <button
+                  onClick={() => setFiltersOpen(false)}
+                  className="text-brand-muted hover:text-brand-ink transition-colors"
+                  aria-label="Close filters"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 pt-4 text-[12.5px]">
+              {renderFilterSections()}
+            </div>
+            <div className="px-4 pb-4 pt-3 border-t border-brand-line shrink-0">
+              <button
+                onClick={() => setFiltersOpen(false)}
+                className="w-full py-2.5 bg-brand-ink text-white font-mono text-[11px] tracking-[0.08em] uppercase rounded-[var(--brand-radius)] hover:bg-brand-ink/90 transition-colors"
+              >
+                Show results{meta ? ` · ${meta.total.toLocaleString()}` : ""}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <CartBar
         onAddToCart={selectedCount > 0 ? handleAddToCart : undefined}
