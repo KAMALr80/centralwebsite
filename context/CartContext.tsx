@@ -28,6 +28,7 @@ interface CartContextValue {
   updateQty: (product_id: number, qty: number) => void;
   removeItem: (product_id: number) => void;
   clearCart: () => void;
+  bulkUpdatePrices: (priceMap: Record<number, number>) => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -91,12 +92,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = useCallback(() => setItems([]), []);
 
+  const bulkUpdatePrices = useCallback((priceMap: Record<number, number>) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        priceMap[item.product_id] !== undefined
+          ? { ...item, price: priceMap[item.product_id] }
+          : item
+      )
+    );
+  }, []);
+
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
   return (
     <CartContext.Provider
-      value={{ items, itemCount, subtotal, addItem, updateQty, removeItem, clearCart }}
+      value={{ items, itemCount, subtotal, addItem, updateQty, removeItem, clearCart, bulkUpdatePrices }}
     >
       {children}
     </CartContext.Provider>

@@ -10,6 +10,7 @@ import { Pagination } from "@/components/shared/Pagination";
 import { CartBar } from "@/components/shared/CartBar";
 import { useProducts, type ProductsParams } from "@/hooks/useProducts";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { useBrands } from "@/hooks/useBrands";
 import { useCategories, type Category } from "@/hooks/useCategories";
 import type { BreadcrumbItem } from "@/components/shared/Breadcrumb";
@@ -53,6 +54,7 @@ export function BrowseLayout({
   const page = Number(searchParams.get("page") ?? 1);
   const sort = (searchParams.get("sort") as ProductsParams["sort"]) ?? defaultSort;
   const inStock = searchParams.get("in_stock") === "true";
+  const search = searchParams.get("search") ?? undefined;
   const activeBrandIds = searchParams.getAll("brand_id").map(Number).filter(Boolean);
   const subCatId = searchParams.get("sub_cat") ? Number(searchParams.get("sub_cat")) : undefined;
   // Sidebar-driven category selection (only used when categoryId prop is not set)
@@ -63,10 +65,11 @@ export function BrowseLayout({
   const [brandSearch, setBrandSearch] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [view, setView] = useState<"list" | "grid">(() => {
-    if (typeof window === "undefined") return "list";
-    return (localStorage.getItem("fastweb_view") as "list" | "grid") ?? "list";
+    if (typeof window === "undefined") return "grid";
+    return (localStorage.getItem("fastweb_view") as "list" | "grid") ?? "grid";
   });
   const { addItem } = useCart();
+  const { isAuthenticated } = useAuth();
 
   function switchView(v: "list" | "grid") {
     setView(v);
@@ -136,6 +139,7 @@ export function BrowseLayout({
     category_id: subCatId ?? catId ?? categoryId,
     brand_id: activeBrandIds.length >= 1 ? activeBrandIds[0] : undefined,
     in_stock: inStock || undefined,
+    search,
     sort,
     page,
     per_page: 48,
@@ -157,6 +161,10 @@ export function BrowseLayout({
   // ── Cart ───────────────────────────────────────────────────────────────────
 
   const handleAddToCart = useCallback(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
     products.forEach((p) => {
       const qty = qtyMap[p.id];
       if (qty && qty > 0 && p.in_stock) {
@@ -175,7 +183,7 @@ export function BrowseLayout({
       }
     });
     setQtyMap({});
-  }, [products, qtyMap, addItem]);
+  }, [products, qtyMap, addItem, isAuthenticated, router]);
 
   const selectedCount = Object.values(qtyMap).filter((q) => q > 0).length;
 
