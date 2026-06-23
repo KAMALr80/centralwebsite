@@ -1,12 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { X, ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useRequireAuth } from "@/components/auth/withAuth";
 import { StockDot } from "@/components/shared/StockDot";
+import api from "@/lib/axios";
 
 // ─── Step Indicator ────────────────────────────────────────────────────────
 
@@ -100,7 +103,39 @@ function QtyStepper({
 export default function CartPage() {
   const { isLoading } = useRequireAuth();
   const { isApproved } = useAuth();
-  const { items, itemCount, subtotal, updateQty, removeItem } = useCart();
+  const { items, itemCount, subtotal, updateQty, removeItem, bulkUpdatePrices } = useCart();
+  const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function handleCheckout() {
+    if (items.length === 0) return;
+    setRefreshing(true);
+    try {
+      const priceMap: Record<number, number> = {};
+      await Promise.all(
+        items.map(async (item) => {
+          try {
+            const res = await api.get<{
+              current_price: string | number | null;
+              sale_price: string | number | null;
+              on_sale: boolean;
+            }>(`/products/${item.product_id}`);
+            const p = res.data;
+            const currentPrice = p.current_price != null ? Number(p.current_price) : null;
+            const salePrice = p.sale_price != null ? Number(p.sale_price) : null;
+            priceMap[item.product_id] =
+              p.on_sale && salePrice ? salePrice : currentPrice ?? 0;
+          } catch {
+            // keep existing price if fetch fails
+          }
+        })
+      );
+      bulkUpdatePrices(priceMap);
+    } finally {
+      setRefreshing(false);
+      router.push("/checkout");
+    }
+  }
 
   if (isLoading) {
     return (
@@ -313,12 +348,13 @@ export default function CartPage() {
 
             <div className="px-5 pb-5">
               {isApproved ? (
-                <Link
-                  href="/checkout"
-                  className="block w-full bg-brand-navy text-white font-mono text-[11px] tracking-[0.08em] uppercase text-center px-5 py-3 hover:bg-brand-navy/90 transition-colors"
+                <button
+                  onClick={handleCheckout}
+                  disabled={refreshing || items.length === 0}
+                  className="block w-full bg-brand-navy text-white font-mono text-[11px] tracking-[0.08em] uppercase text-center px-5 py-3 hover:bg-brand-navy/90 transition-colors disabled:opacity-70"
                 >
-                  Continue to checkout →
-                </Link>
+                  {refreshing ? "Refreshing prices…" : "Continue to checkout →"}
+                </button>
               ) : (
                 <div className="border border-brand-line px-4 py-3 text-center">
                   <p className="font-mono text-[11px] text-brand-muted">

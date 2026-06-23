@@ -3,6 +3,7 @@
 import { use, useState, useCallback, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Heart, GitCompare, ChevronLeft, ChevronRight } from "lucide-react";
 import { useProduct } from "@/hooks/useProducts";
 import { type Product } from "@/hooks/useProducts";
@@ -171,11 +172,17 @@ function QtyStepper({
 function SimpleAddToCart({ product }: { product: Product }) {
   const [qty, setQty] = useState(0);
   const { addItem } = useCart();
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
 
   const price = product.current_price ?? product.sale_price ?? 0;
 
   const handleAdd = () => {
     if (qty === 0) return;
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
     addItem(
       {
         product_id: product.id,
@@ -211,6 +218,8 @@ function GroupedVariantTable({ product }: { product: Product }) {
   const children = product.children ?? [];
   const [qtys, setQtys] = useState<Record<number, number>>({});
   const { addItem } = useCart();
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
 
   const setQty = (id: number, qty: number) =>
     setQtys((prev) => ({ ...prev, [id]: qty }));
@@ -218,6 +227,10 @@ function GroupedVariantTable({ product }: { product: Product }) {
   const selectedCount = Object.values(qtys).filter((q) => q > 0).length;
 
   const handleAddAll = () => {
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
     children.forEach((child) => {
       const qty = qtys[child.id] ?? 0;
       if (qty === 0) return;
