@@ -9,19 +9,21 @@ export function UtilityBar() {
 
   return (
     <div className="bg-brand-navy text-[#C8D2E5] font-mono text-[11px] tracking-[0.04em] uppercase px-4 sm:px-8 py-2 flex justify-between items-center">
-      <span className="hidden sm:inline">FREE FREIGHT ON ORDERS OVER $500 · NET-60 TERMS AVAILABLE</span>
-      <span className="sm:hidden">FREE FREIGHT $500+</span>
+      <span className="hidden sm:inline">Disposable Vape Distributor in White Plains</span>
+      <span className="sm:hidden">Disposable Vape Distributor</span>
 
       <div className="flex items-center gap-4 sm:gap-6">
-        <span className="hidden lg:inline">FOR RETAILERS</span>
-        <span className="hidden lg:inline">FOR BRANDS</span>
-        <span className="hidden lg:inline">HELP</span>
         {isAuthenticated ? (
           <UserAccountMenu />
         ) : (
-          <Link href="/login" className="text-brand-orange hover:text-white transition-colors">
-            SIGN IN
-          </Link>
+            <>
+            <Link href="/register" className="text-white">
+                REGISTER
+            </Link>
+            <Link href="/login" className="text-brand-orange hover:text-white transition-colors">
+                SIGN IN
+            </Link>
+            </>
         )}
       </div>
     </div>

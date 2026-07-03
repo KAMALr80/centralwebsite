@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { BrowseLayout } from "@/components/browse/BrowseLayout";
 
-export const metadata = { title: "Shop — Forge & Co." };
+// export const metadata = { title: "Shop — Forge & Co." };
 
 export default function ShopPage() {
   return (
