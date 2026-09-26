@@ -201,14 +201,7 @@ export function ProductTable({
 
           {/* Qty stepper */}
           <td className={`${TD} w-28 text-right`}>
-            {!p.prices_visible ? (
-              <Link
-                href="/login"
-                className="inline-flex min-h-8 items-center bg-brand-navy px-3 font-mono text-[10px] font-bold uppercase text-white no-underline hover:bg-brand-blue"
-              >
-                Login to Buy
-              </Link>
-            ) : isGrouped ? (
+            {isGrouped ? (
               <span className="text-brand-muted font-mono text-[11px]">— expand —</span>
             ) : !p.in_stock ? (
               <span className="font-mono text-[10px] uppercase text-brand-muted">Out of stock</span>

@@ -164,14 +164,7 @@ export function ProductGrid({
               </div>
 
               <div className="pt-1">
-                {!p.prices_visible ? (
-                  <Link
-                    href="/login"
-                    className="block w-full border border-brand-navy bg-brand-navy py-2 text-center text-[11px] font-bold text-white no-underline transition-colors hover:bg-brand-blue"
-                  >
-                    Login to Buy
-                  </Link>
-                ) : isGrouped ? (
+                {isGrouped ? (
                   <Link
                     href={`/product/${p.id}`}
                     className="block w-full text-center font-mono text-[10.5px] tracking-[0.06em] uppercase text-brand-blue hover:text-brand-blue-deep transition-colors py-1.5 border border-brand-line hover:border-brand-blue"

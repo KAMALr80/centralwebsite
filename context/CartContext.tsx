@@ -7,6 +7,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
+import api from "@/lib/axios";
 
 export interface CartItem {
   product_id: number;
@@ -17,6 +18,7 @@ export interface CartItem {
   quantity: number;
   parent_id?: number | null;
   parent_name?: string | null;
+  price_pending?: boolean;
 }
 
 interface CartContextValue {
@@ -27,6 +29,7 @@ interface CartContextValue {
   updateQty: (product_id: number, qty: number) => void;
   removeItem: (product_id: number) => void;
   clearCart: () => void;
+  refreshPrices: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -171,12 +174,68 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = useCallback(() => clearStoredCart(), []);
 
+  const refreshPrices = useCallback(async () => {
+    const currentItems = getCartSnapshot();
+    if (currentItems.length === 0) return;
+
+    const refreshed = await Promise.allSettled(
+      currentItems.map((item) =>
+        api.get<{
+          id: number;
+          name: string;
+          sku: string | null;
+          image: string | null;
+          current_price: number | string | null;
+          sale_price: number | string | null;
+          regular_price: number | string | null;
+          parent_id?: number | null;
+        }>(`/products/${item.product_id}`)
+      )
+    );
+
+    updateCartItems((items) =>
+      items.map((item) => {
+        const index = currentItems.findIndex(
+          (current) => current.product_id === item.product_id
+        );
+        const result = refreshed[index];
+        if (!result || result.status !== "fulfilled") return item;
+
+        const product = result.value.data;
+        const rawPrice =
+          product.current_price ?? product.sale_price ?? product.regular_price;
+        const price = rawPrice === null ? null : Number(rawPrice);
+        const hasPrice =
+          price !== null && Number.isFinite(price) && price >= 0;
+
+        return {
+          ...item,
+          name: product.name || item.name,
+          sku: product.sku ?? item.sku,
+          image: product.image ?? item.image,
+          parent_id: product.parent_id ?? item.parent_id,
+          price: hasPrice ? price : item.price,
+          price_pending: !hasPrice,
+        };
+      })
+    );
+  }, []);
+
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
   return (
     <CartContext.Provider
-      value={{ items, itemCount, subtotal, addItem, updateQty, removeItem, clearCart }}
+      value={{
+        items,
+        itemCount,
+        subtotal,
+        addItem,
+        updateQty,
+        removeItem,
+        clearCart,
+        refreshPrices,
+      }}
     >
       {children}
     </CartContext.Provider>

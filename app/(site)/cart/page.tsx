@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { X, ShoppingCart } from "lucide-react";
@@ -99,7 +100,25 @@ function QtyStepper({
 export default function CartPage() {
   const { isLoading, isAuthenticated } = useRequireAuth();
   const { isApproved } = useAuth();
-  const { items, itemCount, subtotal, updateQty, removeItem } = useCart();
+  const { items, itemCount, subtotal, updateQty, removeItem, refreshPrices } =
+    useCart();
+  const [pricesRefreshing, setPricesRefreshing] = useState(false);
+  const attemptedPriceRefresh = useRef(false);
+  const hasPendingPrices = items.some((item) => item.price_pending);
+
+  useEffect(() => {
+    if (
+      !isAuthenticated ||
+      !hasPendingPrices ||
+      attemptedPriceRefresh.current
+    ) {
+      return;
+    }
+
+    attemptedPriceRefresh.current = true;
+    setPricesRefreshing(true);
+    refreshPrices().finally(() => setPricesRefreshing(false));
+  }, [hasPendingPrices, isAuthenticated, refreshPrices]);
 
   if (isLoading || !isAuthenticated) {
     return (
@@ -174,6 +193,9 @@ export default function CartPage() {
           {/* Left — Cart groups */}
           <div className="flex-1 min-w-0 space-y-6">
             {groups.map((group) => {
+              const groupHasPendingPrices = group.items.some(
+                (item) => item.price_pending
+              );
               const groupTotal = group.items.reduce(
                 (sum, i) => sum + i.price * i.quantity,
                 0
@@ -211,7 +233,13 @@ export default function CartPage() {
                       <div className="font-mono text-[10.5px] text-brand-muted mt-0.5">
                         {group.items.length} line{group.items.length !== 1 ? "s" : ""}
                         {" · "}
-                        <span className="text-brand-ink">${groupTotal.toFixed(2)}</span>
+                        <span className="text-brand-ink">
+                          {groupHasPendingPrices
+                            ? pricesRefreshing
+                              ? "Updating…"
+                              : "Price unavailable"
+                            : `$${groupTotal.toFixed(2)}`}
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
@@ -252,7 +280,11 @@ export default function CartPage() {
                             <span className="text-brand-ink">{item.name}</span>
                           </td>
                           <td className={`${TD} text-right font-mono`}>
-                            ${item.price.toFixed(2)}
+                            {item.price_pending
+                              ? pricesRefreshing
+                                ? "Updating…"
+                                : "Unavailable"
+                              : `$${item.price.toFixed(2)}`}
                           </td>
                           <td className={`${TD} text-right`}>
                             <QtyStepper
@@ -261,7 +293,9 @@ export default function CartPage() {
                             />
                           </td>
                           <td className={`${TD} text-right font-mono font-semibold`}>
-                            ${(item.price * item.quantity).toFixed(2)}
+                            {item.price_pending
+                              ? "—"
+                              : `$${(item.price * item.quantity).toFixed(2)}`}
                           </td>
                           <td className={`${TD} text-center w-8`}>
                             <button
@@ -292,7 +326,13 @@ export default function CartPage() {
             <div className="px-5 py-4 space-y-3">
               <div className="flex justify-between font-mono text-[12.5px]">
                 <span className="text-brand-muted">Subtotal</span>
-                <span className="text-brand-ink font-semibold">${subtotal.toFixed(2)}</span>
+                <span className="text-brand-ink font-semibold">
+                  {hasPendingPrices
+                    ? pricesRefreshing
+                      ? "Updating…"
+                      : "Price unavailable"
+                    : `$${subtotal.toFixed(2)}`}
+                </span>
               </div>
               <div className="flex justify-between font-mono text-[12.5px]">
                 <span className="text-brand-muted">Shipping</span>
@@ -304,18 +344,44 @@ export default function CartPage() {
               </div>
               <div className="border-t border-brand-line pt-3 flex justify-between font-mono text-[13.5px]">
                 <span className="text-brand-ink font-semibold">Total</span>
-                <span className="text-brand-ink font-semibold">${subtotal.toFixed(2)}</span>
+                <span className="text-brand-ink font-semibold">
+                  {hasPendingPrices
+                    ? pricesRefreshing
+                      ? "Updating…"
+                      : "Price unavailable"
+                    : `$${subtotal.toFixed(2)}`}
+                </span>
               </div>
             </div>
 
             <div className="px-5 pb-5">
-              {isApproved ? (
+              {isApproved && !hasPendingPrices ? (
                 <Link
                   href="/checkout"
                   className="block w-full bg-brand-navy text-white font-mono text-[11px] tracking-[0.08em] uppercase text-center px-5 py-3 hover:bg-brand-navy/90 transition-colors"
                 >
                   Continue to checkout →
                 </Link>
+              ) : hasPendingPrices ? (
+                <div className="border border-brand-line px-4 py-3 text-center">
+                  <p className="font-mono text-[11px] text-brand-muted">
+                    {pricesRefreshing
+                      ? "Updating wholesale prices…"
+                      : "Some prices are unavailable"}
+                  </p>
+                  {!pricesRefreshing && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPricesRefreshing(true);
+                        refreshPrices().finally(() => setPricesRefreshing(false));
+                      }}
+                      className="mt-2 font-mono text-[10px] uppercase tracking-[0.06em] text-brand-blue hover:text-brand-blue-deep"
+                    >
+                      Retry prices
+                    </button>
+                  )}
+                </div>
               ) : (
                 <div className="border border-brand-line px-4 py-3 text-center">
                   <p className="font-mono text-[11px] text-brand-muted">

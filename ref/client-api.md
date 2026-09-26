@@ -1250,7 +1250,8 @@ Places a new order. Prices are resolved from current product records at time of 
 |---|---|---|---|---|
 | `items` | array | Yes | min 1 item | Line items. |
 | `items[].product_id` | integer | Yes | must exist in `products` table | Gateway product ID. |
-| `items[].quantity` | integer | Yes | min 1 | |
+| `items[].quantity` | integer | Yes | min 
+1 | |
 | `currency` | string | No | exactly 3 chars | ISO 4217 code. Defaults to `USD`. |
 | `discount_total` | numeric | No | min 0 | Order-level discount. Defaults to `0`. |
 | `shipping_total` | numeric | No | min 0 | Shipping charge. Defaults to `0`. |

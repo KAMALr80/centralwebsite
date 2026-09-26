@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
 import { Logo } from "@/components/layout/Logo";
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { refreshPrices } = useCart();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -25,7 +27,14 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      router.push("/");
+      await refreshPrices();
+      const requestedPath = new URLSearchParams(window.location.search).get("next");
+      const destination =
+        requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
+          ? requestedPath
+          : "/";
+      router.replace(destination);
+      router.refresh();
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number; data?: { message?: string } } })?.response?.status;
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "";

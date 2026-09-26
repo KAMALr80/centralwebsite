@@ -10,6 +10,7 @@ import { Pagination } from "@/components/shared/Pagination";
 import { CartBar } from "@/components/shared/CartBar";
 import { useProducts, type ProductsParams } from "@/hooks/useProducts";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { useBrands } from "@/hooks/useBrands";
 import { useCategories, type Category } from "@/hooks/useCategories";
 import type { BreadcrumbItem } from "@/components/shared/Breadcrumb";
@@ -67,7 +68,8 @@ export function BrowseLayout({
   const [qtyMap, setQtyMap] = useState<Record<number, number>>({});
   const [brandSearch, setBrandSearch] = useState("");
   const [view, setView] = useState<"list" | "grid">("list");
-  const { addItem } = useCart();
+  const { items: cartItems, addItem, updateQty } = useCart();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     let cancelled = false;
@@ -176,7 +178,53 @@ export function BrowseLayout({
 
   // ── Cart ───────────────────────────────────────────────────────────────────
 
+  const persistSelectedItems = useCallback(() => {
+    products.forEach((product) => {
+      const quantity = qtyMap[product.id] ?? 0;
+      if (quantity <= 0 || !product.in_stock) return;
+
+      if (cartItems.some((item) => item.product_id === product.id)) {
+        updateQty(product.id, quantity);
+        return;
+      }
+
+      const rawPrice =
+        product.current_price ?? product.sale_price ?? product.regular_price;
+      const price = rawPrice === null ? 0 : Number(rawPrice);
+
+      addItem(
+        {
+          product_id: product.id,
+          name: product.name,
+          sku: product.sku,
+          image: product.image,
+          price: Number.isFinite(price) && price >= 0 ? price : 0,
+          parent_id: product.parent_id,
+          parent_name: null,
+          price_pending: !product.prices_visible || rawPrice === null,
+        },
+        quantity
+      );
+    });
+  }, [products, qtyMap, cartItems, addItem, updateQty]);
+
   const handleAddToCart = useCallback(() => {
+    const selectedProducts = products.filter(
+      (product) => (qtyMap[product.id] ?? 0) > 0
+    );
+
+    if (!isAuthenticated) {
+      persistSelectedItems();
+      setQtyMap({});
+      return;
+    }
+
+    if (selectedProducts.some((product) => !product.prices_visible)) {
+      persistSelectedItems();
+      router.push("/cart");
+      return;
+    }
+
     products.forEach((p) => {
       const qty = qtyMap[p.id];
       const price = p.current_price ?? p.sale_price;
@@ -196,7 +244,24 @@ export function BrowseLayout({
       }
     });
     setQtyMap({});
-  }, [products, qtyMap, addItem, setQtyMap]);
+  }, [
+    products,
+    qtyMap,
+    addItem,
+    isAuthenticated,
+    persistSelectedItems,
+    router,
+    setQtyMap,
+  ]);
+
+  const handleViewCart = useCallback(() => {
+    if (!isAuthenticated) {
+      persistSelectedItems();
+      router.push("/login?next=/cart");
+      return;
+    }
+    router.push("/cart");
+  }, [isAuthenticated, persistSelectedItems, router]);
 
   const selectedCount = Object.values(qtyMap).filter((q) => q > 0).length;
 
@@ -503,6 +568,7 @@ export function BrowseLayout({
       <CartBar
         onAddToCart={selectedCount > 0 ? handleAddToCart : undefined}
         selectedCount={selectedCount}
+        onViewCart={handleViewCart}
       />
     </div>
   );

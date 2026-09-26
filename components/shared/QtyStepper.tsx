@@ -8,7 +8,13 @@ interface QtyStepperProps {
   disabled?: boolean;
 }
 
-export function QtyStepper({ value, onChange, min = 0, max, disabled = false }: QtyStepperProps) {
+export function QtyStepper({
+  value,
+  onChange,
+  min = 0,
+  max,
+  disabled = false,
+}: QtyStepperProps) {
   const decrement = () => onChange(Math.max(min, value - 1));
   const increment = () => {
     if (max !== undefined && value >= max) return;
@@ -16,17 +22,17 @@ export function QtyStepper({ value, onChange, min = 0, max, disabled = false }: 
   };
 
   return (
-    <div className="inline-flex border border-brand-line h-[26px] items-stretch rounded-[var(--brand-radius)] overflow-hidden">
+    <div className="inline-flex h-8 items-stretch overflow-hidden border border-brand-line bg-brand-white">
       <button
         type="button"
         onClick={decrement}
         disabled={disabled || value <= min}
         aria-label="Decrease quantity"
-        className="w-[22px] flex items-center justify-center border-r border-brand-line text-brand-muted text-[13px] hover:bg-brand-bg-alt disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="flex w-7 items-center justify-center border-r border-brand-line bg-brand-white text-[14px] text-brand-muted transition-colors hover:bg-brand-bg-alt disabled:cursor-not-allowed disabled:text-brand-line"
       >
         −
       </button>
-      <span className="w-9 flex items-center justify-center font-mono text-[12px] text-brand-ink select-none">
+      <span className="flex w-11 select-none items-center justify-center bg-brand-white font-mono text-[14px] text-brand-ink">
         {value}
       </span>
       <button
@@ -34,7 +40,7 @@ export function QtyStepper({ value, onChange, min = 0, max, disabled = false }: 
         onClick={increment}
         disabled={disabled || (max !== undefined && value >= max)}
         aria-label="Increase quantity"
-        className="w-[22px] flex items-center justify-center border-l border-brand-line text-brand-ink text-[13px] bg-brand-bg-alt hover:bg-brand-line disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="flex w-7 items-center justify-center border-l border-brand-line bg-brand-bg-alt text-[14px] text-brand-ink transition-colors hover:bg-brand-line disabled:cursor-not-allowed disabled:text-brand-muted/40"
       >
         +
       </button>
