@@ -1,4 +1,8 @@
 "use client";
+import { cn } from "@/lib/utils";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { Suspense, useState, type FormEvent } from "react";
 import Link from "next/link";
@@ -45,34 +49,34 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="w-full max-w-md border border-brand-line bg-brand-white p-8 shadow-lg sm:p-10">
+    <div className="w-full max-w-md rounded-xl bg-card p-8 shadow-lg ring-1 ring-foreground/10 sm:p-10">
       <Logo />
-      <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.1em] text-brand-orange">Account recovery</p>
-      <h1 className="mt-2 text-2xl font-semibold text-brand-ink">Choose a new password</h1>
+      <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.1em] text-primary">Account recovery</p>
+      <h1 className="mt-2 text-2xl font-semibold text-foreground">Choose a new password</h1>
 
       {success ? (
         <div className="mt-6">
-          <div className="border border-green-200 bg-green-50 p-4 text-sm text-green-800" role="status">
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800" role="status">
             <div className="flex items-center gap-2 font-semibold"><CheckCircle size={17} /> Password updated</div>
           </div>
-          <Link href="/login" className="mt-5 inline-flex h-11 items-center bg-brand-navy px-5 text-sm font-bold text-white no-underline hover:bg-brand-blue">Sign in</Link>
+          <Link href="/login" className={cn(buttonVariants({ size: "lg" }), "mt-5 h-11 px-5 text-sm no-underline")}>Sign in</Link>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <label className="block text-xs font-semibold text-brand-ink">Email address
-            <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" className="mt-1.5 h-11 w-full border border-brand-line px-3 text-sm outline-none focus:border-brand-blue" />
-          </label>
-          <label className="block text-xs font-semibold text-brand-ink">New password
-            <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} autoComplete="new-password" className="mt-1.5 h-11 w-full border border-brand-line px-3 text-sm outline-none focus:border-brand-blue" />
-          </label>
-          <label className="block text-xs font-semibold text-brand-ink">Confirm new password
-            <input type="password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} required minLength={8} autoComplete="new-password" className="mt-1.5 h-11 w-full border border-brand-line px-3 text-sm outline-none focus:border-brand-blue" />
-          </label>
-          {error && <p className="text-sm text-red-700" role="alert">{error}</p>}
-          <button type="submit" disabled={loading || !token} className="flex h-11 w-full items-center justify-center gap-2 bg-brand-navy text-sm font-bold text-white hover:bg-brand-blue disabled:opacity-60">
-            {loading && <Loader2 size={15} className="animate-spin" />}
+          <Label className="flex-col items-start gap-1.5 text-xs font-medium text-foreground">Email address
+            <Input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" className="h-11 md:text-sm" />
+          </Label>
+          <Label className="flex-col items-start gap-1.5 text-xs font-medium text-foreground">New password
+            <Input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} autoComplete="new-password" className="h-11 md:text-sm" />
+          </Label>
+          <Label className="flex-col items-start gap-1.5 text-xs font-medium text-foreground">Confirm new password
+            <Input type="password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} required minLength={8} autoComplete="new-password" className="h-11 md:text-sm" />
+          </Label>
+          {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
+          <Button type="submit" size="lg" disabled={loading || !token} className="h-11 w-full text-sm">
+            {loading && <Loader2 className="animate-spin" />}
             Reset password
-          </button>
+          </Button>
         </form>
       )}
     </div>
@@ -80,5 +84,5 @@ function ResetPasswordForm() {
 }
 
 export default function ResetPasswordPage() {
-  return <Suspense fallback={<div className="text-sm text-brand-muted">Loading…</div>}><ResetPasswordForm /></Suspense>;
+  return <Suspense fallback={<div className="text-sm text-muted-foreground">Loading…</div>}><ResetPasswordForm /></Suspense>;
 }

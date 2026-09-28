@@ -5,17 +5,13 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { useBrands } from "@/hooks/useBrands";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function Placeholder({ label }: { label: string }) {
   return (
-    <div
-      className="w-full h-full flex items-center justify-center"
-      style={{
-        background: "repeating-linear-gradient(135deg, #E5DFD0 0 14px, #D9D3C5 14px 28px)",
-      }}
-    >
-      <span className="font-mono text-[10px] tracking-[0.08em] uppercase px-2 py-1 text-brand-muted bg-brand-bg/90 rounded-none">
-        {label}
+    <div className="flex h-full w-full items-center justify-center bg-muted">
+      <span className="font-heading text-3xl font-semibold uppercase text-muted-foreground/60">
+        {label.slice(0, 2)}
       </span>
     </div>
   );
@@ -25,72 +21,72 @@ export default function BrandsPage() {
   const { data: brands, isLoading } = useBrands();
 
   return (
-    <div className="bg-brand-bg min-h-screen">
+    <div className="min-h-screen bg-background">
       <PageHeader
         crumbs={[{ label: "Brands" }]}
         title="All Brands"
         meta={brands ? `${brands.length} brands` : undefined}
       />
 
-      <div className="px-8 py-8 max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-8">
         {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-brand-white border border-brand-line animate-pulse">
-                <div className="aspect-[4/3] bg-brand-bg-alt" />
-                <div className="p-4 space-y-2">
-                  <div className="h-4 bg-brand-bg-alt rounded-none w-3/4" />
-                  <div className="h-3 bg-brand-bg-alt rounded-none w-1/2" />
+              <div key={i} className="overflow-hidden rounded-lg bg-card ring-1 ring-foreground/10">
+                <Skeleton className="aspect-[4/3] rounded-none" />
+                <div className="space-y-2 p-4">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
                 </div>
               </div>
             ))}
           </div>
         ) : !brands?.length ? (
-          <div className="flex items-center justify-center h-40 font-mono text-[11px] text-brand-muted tracking-widest uppercase">
+          <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
             No brands found
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {brands.map((brand) => (
               <Link
                 key={brand.id}
                 href={`/brand/${brand.id}`}
-                className="bg-brand-white border border-brand-line hover:border-brand-blue transition-colors no-underline group block"
+                className="group block overflow-hidden rounded-lg bg-card no-underline ring-1 ring-foreground/10 transition-shadow hover:shadow-md hover:ring-primary/30"
               >
-                <div className="aspect-[4/3] relative overflow-hidden">
+                <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                   {brand.image ? (
                     <Image
                       src={brand.image}
                       alt={brand.name}
                       fill
                       sizes="(max-width: 768px) 50vw, 25vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
                     <Placeholder label={brand.name} />
                   )}
                 </div>
-                <div className="px-4 pt-4 pb-5">
+                <div className="px-4 pb-5 pt-4">
                   {brand.location && (
-                    <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-muted mb-1">
+                    <div className="mb-1 text-[11px] uppercase tracking-wide text-muted-foreground">
                       {brand.location}
                     </div>
                   )}
-                  <div className="font-serif text-[20px] text-brand-ink font-normal leading-tight">
+                  <div className="font-heading text-lg font-semibold leading-tight text-foreground">
                     {brand.name}
                   </div>
                   {brand.description && (
-                    <p className="text-[12px] text-brand-muted leading-relaxed mt-1.5 line-clamp-2">
+                    <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
                       {brand.description}
                     </p>
                   )}
-                  <div className="flex items-center justify-between mt-3">
+                  <div className="mt-3 flex items-center justify-between">
                     {brand.products_count !== undefined && (
-                      <span className="font-mono text-[10px] tracking-[0.06em] uppercase text-brand-muted">
+                      <span className="text-xs text-muted-foreground">
                         {brand.products_count} SKUs
                       </span>
                     )}
-                    <ArrowRight size={14} className="text-brand-blue ml-auto" />
+                    <ArrowRight className="ml-auto size-4 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
                   </div>
                 </div>
               </Link>

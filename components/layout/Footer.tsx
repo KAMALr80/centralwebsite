@@ -1,5 +1,7 @@
 import { Mail, MapPin, Phone, Send } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Logo } from "./Logo";
 
 const COLUMNS = [
@@ -33,34 +35,31 @@ const BUSINESS_HOURS = [
 ];
 
 const headingClass =
-  "mb-5 text-[19px] font-bold leading-tight tracking-[-0.02em] text-brand-navy";
+  "mb-5 text-[19px] font-bold leading-tight tracking-[-0.02em] text-foreground";
 const linkClass =
-  "text-brand-muted no-underline transition-colors hover:text-brand-orange focus-visible:text-brand-orange";
+  "text-muted-foreground no-underline transition-colors hover:text-primary focus-visible:text-primary";
 
 export function Footer() {
   const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME ?? "Central Smoke Distro";
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-brand-white text-brand-ink">
-      <div className="border-b border-white/10 bg-brand-navy px-6 py-4 text-white lg:px-10">
+    <footer className="border-t border-border bg-card text-foreground">
+      <div className="border-b border-white/10 bg-foreground px-6 py-4 text-white lg:px-10">
         <div className="mx-auto flex max-w-[1768px] flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4 text-[20px] font-bold tracking-[-0.02em]">
-            <Send size={26} className="shrink-0 text-brand-orange" />
+            <Send size={26} className="shrink-0 text-primary" />
             Sign up to Newsletter
           </div>
-          <form className="flex h-12 w-full max-w-[620px] overflow-hidden border-2 border-brand-orange bg-brand-white">
-            <input
+          <form className="flex w-full max-w-[620px] gap-2">
+            <Input
               type="email"
               placeholder="Enter your email address"
-              className="h-full min-w-0 flex-1 border-0 bg-brand-white px-4 text-[14px] text-brand-ink outline-none placeholder:text-brand-muted sm:px-5"
+              className="h-11 flex-1 border-background/20 bg-background/10 px-4 text-background placeholder:text-background/50 md:text-sm"
             />
-            <button
-              type="submit"
-              className="h-full shrink-0 border-0 border-l-2 border-brand-orange bg-brand-orange px-5 text-[14px] font-bold uppercase tracking-[0.06em] text-white transition-colors hover:bg-brand-blue sm:px-9"
-            >
-              SignUp
-            </button>
+            <Button type="submit" size="lg" className="h-11 px-6 text-sm">
+              Sign up
+            </Button>
           </form>
         </div>
       </div>
@@ -68,7 +67,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-[1760px] gap-x-10 gap-y-10 px-6 py-10 sm:grid-cols-2 lg:grid-cols-3 lg:px-10 lg:py-11 xl:grid-cols-[1fr_1.45fr_0.9fr_1fr_1.35fr] 2xl:grid-cols-[210px_340px_230px_250px_330px] 2xl:justify-between">
         <div className="sm:col-span-2 lg:col-span-1">
           <Logo size={110} />
-          <p className="mt-5 max-w-[230px] text-[15px] leading-7 text-brand-muted">
+          <p className="mt-5 max-w-[230px] text-[15px] leading-7 text-muted-foreground">
             A wholesale marketplace built for independent retailers. 600+ vetted brands,
             one invoice, sixty-day terms.
           </p>
@@ -77,21 +76,21 @@ export function Footer() {
         <div>
           <h2 className={headingClass}>Need Assistance?</h2>
           <address className="not-italic">
-            <ul className="space-y-3.5 text-[15px] leading-6 text-brand-muted">
+            <ul className="space-y-3.5 text-[15px] leading-6 text-muted-foreground">
               <li className="flex gap-3">
-                <Phone size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-brand-navy" />
+                <Phone size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
                 <a href="tel:+19145395580" className={linkClass}>+1 (914) 539-5580</a>
               </li>
               <li className="flex gap-3">
-                <Mail size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-brand-navy" />
+                <Mail size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
                 <a href="mailto:info@centralsmokedistro.com" className={`${linkClass} min-w-0 break-words`}>info@centralsmokedistro.com</a>
               </li>
               <li className="flex gap-3">
-                <Mail size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-brand-navy" />
+                <Mail size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
                 <a href="mailto:support@centralsmokedistro.com" className={`${linkClass} min-w-0 break-words`}>support@centralsmokedistro.com</a>
               </li>
               <li className="flex gap-3">
-                <MapPin size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-brand-navy" />
+                <MapPin size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
                 <span>Brooklyn - Portland - Chicago</span>
               </li>
             </ul>
@@ -113,7 +112,7 @@ export function Footer() {
 
         <div>
           <h2 className={headingClass}>Business Hours</h2>
-          <ul className="space-y-2 text-[15px] leading-6 text-brand-muted">
+          <ul className="space-y-2 text-[15px] leading-6 text-muted-foreground">
             {BUSINESS_HOURS.map(([day, hours]) => (
               <li key={day} className="grid grid-cols-[90px_1fr] gap-3">
                 <span>{day}</span>
@@ -124,8 +123,8 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-brand-line bg-brand-bg-alt/40 px-6 py-4 lg:px-10">
-        <div className="mx-auto flex max-w-[1680px] flex-col gap-2 font-mono text-[10px] uppercase tracking-[0.08em] text-brand-muted sm:flex-row sm:items-center sm:justify-between">
+      <div className="border-t border-border bg-muted/40 px-6 py-4 lg:px-10">
+        <div className="mx-auto flex max-w-[1680px] flex-col gap-2 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <span>© {year} {companyName} Wholesale Inc.</span>
           <span>Free freight over $500 - Net-60 terms available</span>
         </div>

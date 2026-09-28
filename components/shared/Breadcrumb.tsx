@@ -1,4 +1,13 @@
+import { Fragment } from "react";
 import Link from "next/link";
+import {
+  Breadcrumb as BreadcrumbRoot,
+  BreadcrumbItem as BreadcrumbListItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export interface BreadcrumbItem {
   label: string;
@@ -11,21 +20,21 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
   return (
-    <nav aria-label="Breadcrumb">
-      <ol className="flex items-center gap-2 font-mono text-[11px] tracking-[0.08em] uppercase text-brand-muted">
+    <BreadcrumbRoot>
+      <BreadcrumbList>
         {items.map((item, i) => (
-          <li key={i} className="flex items-center gap-2">
-            {i > 0 && <span className="text-brand-line">/</span>}
-            {item.href ? (
-              <Link href={item.href} className="hover:text-brand-ink transition-colors">
-                {item.label}
-              </Link>
-            ) : (
-              <span className="text-brand-ink">{item.label}</span>
-            )}
-          </li>
+          <Fragment key={i}>
+            {i > 0 && <BreadcrumbSeparator />}
+            <BreadcrumbListItem>
+              {item.href ? (
+                <BreadcrumbLink render={<Link href={item.href} />}>{item.label}</BreadcrumbLink>
+              ) : (
+                <BreadcrumbPage>{item.label}</BreadcrumbPage>
+              )}
+            </BreadcrumbListItem>
+          </Fragment>
         ))}
-      </ol>
-    </nav>
+      </BreadcrumbList>
+    </BreadcrumbRoot>
   );
 }

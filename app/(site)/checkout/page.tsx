@@ -3,54 +3,29 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Check, Plus, Pencil, X } from "lucide-react";
+import { Check, ChevronLeft, Plus, Pencil, ArrowRight, Loader2 } from "lucide-react";
 import { useRequireApproved } from "@/components/auth/withAuth";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useAddresses, useCreateAddress, useUpdateAddress, type Address, type NewAddress } from "@/hooks/useAddresses";
 import api from "@/lib/axios";
-
-// ─── Step Indicator ──────────────────────────────────────────────────────────
-
-function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
-  const steps = ["Cart", "Checkout", "Confirmation"];
-  return (
-    <div className="flex items-center gap-0">
-      {steps.map((label, i) => {
-        const n = i + 1;
-        const active = n === step;
-        const done = n < step;
-        return (
-          <div key={label} className="flex items-center">
-            <div className="flex items-center gap-2 px-4 py-2.5">
-              <span
-                className={`w-5 h-5 rounded-none flex items-center justify-center font-mono text-[10px] shrink-0 ${
-                  active
-                    ? "bg-brand-orange text-white"
-                    : done
-                    ? "bg-brand-navy text-white"
-                    : "bg-brand-bg-alt text-brand-muted border border-brand-line"
-                }`}
-              >
-                {done ? "✓" : n}
-              </span>
-              <span
-                className={`font-mono text-[10.5px] tracking-[0.06em] uppercase ${
-                  active ? "text-brand-ink" : "text-brand-muted"
-                }`}
-              >
-                {label}
-              </span>
-            </div>
-            {i < steps.length - 1 && (
-              <span className="text-brand-line font-mono text-[12px] select-none">→</span>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+import { StepIndicator } from "@/components/shared/StepIndicator";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 // ─── Address Card ─────────────────────────────────────────────────────────────
 
@@ -70,27 +45,29 @@ function AddressCard({
       onClick={onSelect}
       role="button"
       tabIndex={0}
+      aria-pressed={selected}
       onKeyDown={(e) => e.key === "Enter" && onSelect()}
-      className={`w-full text-left p-4 border-2 transition-colors cursor-pointer ${
+      className={cn(
+        "w-full cursor-pointer rounded-lg p-4 text-left outline-none ring-1 transition-all focus-visible:ring-2 focus-visible:ring-ring/50",
         selected
-          ? "border-brand-orange bg-brand-orange/5"
-          : "border-brand-line hover:border-brand-blue bg-brand-white"
-      }`}
+          ? "bg-primary/5 ring-2 ring-primary"
+          : "bg-card ring-border hover:ring-primary/50"
+      )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           {address.label && (
-            <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-muted mb-1">
+            <div className="mb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               {address.label}
             </div>
           )}
-          <div className="text-[13px] font-medium text-brand-ink">
+          <div className="text-sm font-medium text-foreground">
             {address.first_name} {address.last_name}
           </div>
           {address.company && (
-            <div className="text-[12px] text-brand-muted">{address.company}</div>
+            <div className="text-xs text-muted-foreground">{address.company}</div>
           )}
-          <div className="text-[12px] text-brand-muted mt-1 leading-relaxed">
+          <div className="mt-1 text-xs leading-relaxed text-muted-foreground">
             {address.address_1}
             {address.address_2 && <>, {address.address_2}</>}
             <br />
@@ -99,18 +76,20 @@ function AddressCard({
             {address.country}
           </div>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-          <button
+        <div className="mt-0.5 flex shrink-0 items-center gap-1">
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-xs"
             onClick={(e) => { e.stopPropagation(); onEdit(); }}
             title="Edit address"
-            className="w-5 h-5 flex items-center justify-center text-brand-muted hover:text-brand-ink transition-colors"
+            aria-label="Edit address"
           >
-            <Pencil size={11} />
-          </button>
+            <Pencil />
+          </Button>
           {selected && (
-            <span className="w-5 h-5 bg-brand-orange rounded-none flex items-center justify-center">
-              <Check size={11} className="text-white" />
+            <span className="flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <Check className="size-3" />
             </span>
           )}
         </div>
@@ -128,6 +107,7 @@ function AddressSelector({
   onSelect,
   onAdd,
   onEdit,
+  extra,
 }: {
   title: string;
   addresses: Address[];
@@ -135,37 +115,37 @@ function AddressSelector({
   onSelect: (addr: Address) => void;
   onAdd: () => void;
   onEdit: (addr: Address) => void;
+  extra?: React.ReactNode;
 }) {
   return (
-    <div>
-      <div className="font-mono text-[10.5px] tracking-[0.1em] uppercase text-brand-ink border-b border-brand-ink pb-2 mb-3">
-        {title}
-      </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardAction>
+          <Button variant="outline" size="sm" onClick={onAdd}>
+            <Plus data-icon="inline-start" /> Add new
+          </Button>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {addresses.length === 0 && (
+          <p className="text-sm text-muted-foreground">No saved addresses.</p>
+        )}
 
-      {addresses.length === 0 && (
-        <p className="font-mono text-[12px] text-brand-muted mb-3">No saved addresses.</p>
-      )}
-
-      <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {addresses.map((addr) => (
-          <AddressCard
-            key={addr.id}
-            address={addr}
-            selected={selected?.id === addr.id}
-            onSelect={() => onSelect(addr)}
-            onEdit={() => onEdit(addr)}
-          />
-        ))}
-      </div>
-
-      <button
-        onClick={onAdd}
-        className="flex items-center gap-1.5 font-mono text-[10.5px] tracking-[0.06em] uppercase text-brand-blue hover:text-brand-blue-deep transition-colors"
-      >
-        <Plus size={12} />
-        Add new address
-      </button>
-    </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {addresses.map((addr) => (
+            <AddressCard
+              key={addr.id}
+              address={addr}
+              selected={selected?.id === addr.id}
+              onSelect={() => onSelect(addr)}
+              onEdit={() => onEdit(addr)}
+            />
+          ))}
+        </div>
+        {extra}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -200,15 +180,15 @@ function AddressField({
 }) {
   return (
     <div className={half ? "flex-1" : "w-full"}>
-      <label className="block font-mono text-[10px] tracking-[0.06em] uppercase text-brand-muted mb-1">
-        {label} {required && <span className="text-[#B83434]">*</span>}
-      </label>
-      <input
+      <Label className="mb-1.5 text-xs font-medium text-foreground">
+        {label} {required && <span className="text-destructive">*</span>}
+      </Label>
+      <Input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full h-9 px-3 border border-brand-line text-[12.5px] bg-brand-white focus:outline-none focus:border-brand-blue rounded-[var(--brand-radius)]"
+        className="h-9 md:text-sm"
       />
     </div>
   );
@@ -262,31 +242,13 @@ function AddressModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40" />
+    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{initial ? "Edit address" : "New address"}</DialogTitle>
+        </DialogHeader>
 
-      {/* Panel */}
-      <div className="relative w-full max-w-lg bg-brand-white max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-brand-ink">
-          <span className="font-mono text-[10.5px] tracking-[0.1em] uppercase text-brand-ink">
-            {initial ? "Edit address" : "New address"}
-          </span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-brand-muted hover:text-brand-ink transition-colors"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-5">
+        <form onSubmit={handleSubmit}>
           <div className="space-y-3">
             <div className="flex gap-3">
               <AddressField label="First name" value={form.first_name} onChange={(v) => set("first_name", v)} required half />
@@ -309,29 +271,20 @@ function AddressModal({
             <AddressField label="Phone" value={form.phone ?? ""} onChange={(v) => set("phone", v)} required />
           </div>
 
-          {error && (
-            <p className="mt-3 font-mono text-[11px] text-[#B83434]">{error}</p>
-          )}
+          {error && <p className="mt-3 text-xs text-destructive">{error}</p>}
 
-          <div className="mt-5 flex items-center gap-3">
-            <button
-              type="submit"
-              disabled={isPending}
-              className="bg-brand-navy text-white font-mono text-[11px] tracking-[0.08em] uppercase px-5 py-2 hover:bg-brand-navy/90 transition-colors disabled:opacity-50"
-            >
-              {isPending ? "Saving…" : initial ? "Update address" : "Save address"}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="font-mono text-[11px] tracking-[0.06em] uppercase text-brand-muted hover:text-brand-ink transition-colors"
-            >
+          <DialogFooter className="mt-5">
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
-            </button>
-          </div>
+            </Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending && <Loader2 className="animate-spin" />}
+              {isPending ? "Saving…" : initial ? "Update address" : "Save address"}
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -341,6 +294,8 @@ interface ModalState {
   initial?: Address;
   onSave: (addr: Address) => void;
 }
+
+const TH = "text-[11px] font-medium uppercase tracking-wide text-muted-foreground";
 
 export default function CheckoutPage() {
   const { isLoading, isAuthenticated, isApproved } = useRequireApproved();
@@ -388,7 +343,7 @@ export default function CheckoutPage() {
 
   if (isLoading || !isAuthenticated || !isApproved) {
     return (
-      <div className="flex items-center justify-center h-60 font-mono text-[11px] text-brand-muted tracking-widest uppercase">
+      <div className="flex h-60 items-center justify-center text-sm text-muted-foreground">
         Loading…
       </div>
     );
@@ -453,15 +408,11 @@ export default function CheckoutPage() {
     }
   };
 
-  const TH = "px-3 py-2 font-mono text-[10px] tracking-[0.08em] uppercase text-brand-muted border-b border-brand-ink text-left bg-brand-bg-alt";
-  const TD = "px-3 py-2.5 text-[12.5px] text-brand-ink border-b border-brand-line align-middle";
-
   return (
-    <div className="bg-brand-bg min-h-screen pb-20">
-      {/* Page header */}
-      <div className="px-8 py-5 border-b border-brand-line bg-brand-white">
-        <div className="flex items-start justify-between">
-          <h1 className="font-serif text-[36px] font-normal text-brand-ink leading-none">
+    <div className="min-h-screen bg-background pb-20">
+      <div className="border-b border-border bg-card px-4 py-6 sm:px-8">
+        <div className="mx-auto flex max-w-[1400px] flex-wrap items-start justify-between gap-4">
+          <h1 className="font-heading text-3xl font-semibold leading-none text-foreground">
             Checkout
           </h1>
           <StepIndicator step={2} />
@@ -469,139 +420,126 @@ export default function CheckoutPage() {
       </div>
 
       <div className="mx-auto flex max-w-[1400px] flex-col items-start gap-6 px-4 py-6 sm:px-8 lg:flex-row">
-        {/* Left — form sections */}
-        <div className="flex-1 min-w-0 space-y-8">
-          {/* Billing address */}
-          <section className="bg-brand-white border border-brand-line p-6">
-            <AddressSelector
-              title="Billing address"
-              addresses={addresses}
-              selected={billingAddr}
-              onSelect={setBillingAddr}
-              onAdd={() => openAddModal(setBillingAddr)}
-              onEdit={openEditModal}
-            />
-          </section>
+        <div className="min-w-0 flex-1 space-y-4">
+          <AddressSelector
+            title="Billing address"
+            addresses={addresses}
+            selected={billingAddr}
+            onSelect={setBillingAddr}
+            onAdd={() => openAddModal(setBillingAddr)}
+            onEdit={openEditModal}
+          />
 
-          {/* Shipping address */}
-          <section className="bg-brand-white border border-brand-line p-6">
-            <AddressSelector
-              title="Shipping address"
-              addresses={addresses}
-              selected={shippingAddr}
-              onSelect={setShippingAddr}
-              onAdd={() => openAddModal(setShippingAddr)}
-              onEdit={openEditModal}
-            />
-            {billingAddr && shippingAddr?.id !== billingAddr?.id && (
-              <button
-                onClick={() => setShippingAddr(billingAddr)}
-                className="mt-3 font-mono text-[10.5px] tracking-[0.06em] uppercase text-brand-blue hover:text-brand-blue-deep transition-colors"
-              >
-                Use same as billing
-              </button>
-            )}
-          </section>
+          <AddressSelector
+            title="Shipping address"
+            addresses={addresses}
+            selected={shippingAddr}
+            onSelect={setShippingAddr}
+            onAdd={() => openAddModal(setShippingAddr)}
+            onEdit={openEditModal}
+            extra={
+              billingAddr && shippingAddr?.id !== billingAddr?.id ? (
+                <Button variant="link" size="sm" className="px-0" onClick={() => setShippingAddr(billingAddr)}>
+                  Use same as billing
+                </Button>
+              ) : null
+            }
+          />
 
-          {/* Order note */}
-          <section className="bg-brand-white border border-brand-line p-6">
-            <div className="font-mono text-[10.5px] tracking-[0.1em] uppercase text-brand-ink border-b border-brand-ink pb-2 mb-3">
-              Order note
-            </div>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Customer note / P.O. reference (optional)"
-              rows={3}
-              className="w-full px-3 py-2 border border-brand-line text-[12.5px] bg-brand-white focus:outline-none focus:border-brand-blue resize-none rounded-[var(--brand-radius)] placeholder:text-brand-muted"
-            />
-          </section>
+          <Card>
+            <CardHeader>
+              <CardTitle>Order note</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Customer note / P.O. reference (optional)"
+                rows={3}
+                className="resize-none md:text-sm"
+              />
+            </CardContent>
+          </Card>
 
-          {/* Order review */}
-          <section className="bg-brand-white border border-brand-line p-6">
-            <div className="flex items-center justify-between border-b border-brand-ink pb-2 mb-3">
-              <span className="font-mono text-[10.5px] tracking-[0.1em] uppercase text-brand-ink">
+          <Card className="gap-0 pb-0">
+            <CardHeader className="border-b border-border pb-4">
+              <CardTitle>
                 Order review · {items.length} line{items.length !== 1 ? "s" : ""}
-              </span>
-              <Link
-                href="/cart"
-                className="font-mono text-[10px] tracking-[0.06em] uppercase text-brand-blue hover:text-brand-blue-deep transition-colors"
-              >
-                ← Edit in cart
-              </Link>
-            </div>
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className={TH}>Product</th>
-                  <th className={`${TH} text-right w-16`}>Qty</th>
-                  <th className={`${TH} text-right w-24`}>Unit price</th>
-                  <th className={`${TH} text-right w-24`}>Total</th>
-                </tr>
-              </thead>
-              <tbody>
+              </CardTitle>
+              <CardAction>
+                <Link href="/cart" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "no-underline")}>
+                  <ChevronLeft data-icon="inline-start" /> Edit in cart
+                </Link>
+              </CardAction>
+            </CardHeader>
+            <Table>
+              <TableHeader className="bg-muted/50">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className={cn(TH, "pl-4")}>Product</TableHead>
+                  <TableHead className={cn(TH, "w-16 text-right")}>Qty</TableHead>
+                  <TableHead className={cn(TH, "w-24 text-right")}>Unit price</TableHead>
+                  <TableHead className={cn(TH, "w-24 pr-4 text-right")}>Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {items.map((item) => (
-                  <tr key={item.product_id}>
-                    <td className={TD}>
-                      <div className="text-brand-ink">{item.name}</div>
-                      <div className="font-mono text-[10.5px] text-brand-muted">{item.sku}</div>
-                    </td>
-                    <td className={`${TD} text-right font-mono`}>{item.quantity}</td>
-                    <td className={`${TD} text-right font-mono`}>${item.price.toFixed(2)}</td>
-                    <td className={`${TD} text-right font-mono font-semibold`}>
+                  <TableRow key={item.product_id} className="text-[12.5px]">
+                    <TableCell className="whitespace-normal pl-4">
+                      <div className="text-foreground">{item.name}</div>
+                      <div className="font-mono text-[10.5px] text-muted-foreground">{item.sku}</div>
+                    </TableCell>
+                    <TableCell className="text-right font-mono">{item.quantity}</TableCell>
+                    <TableCell className="text-right font-mono">${item.price.toFixed(2)}</TableCell>
+                    <TableCell className="pr-4 text-right font-mono font-semibold">
                       ${(item.price * item.quantity).toFixed(2)}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </section>
+              </TableBody>
+            </Table>
+          </Card>
         </div>
 
-        {/* Right — summary */}
-        <div className="w-full shrink-0 border border-brand-line bg-brand-white lg:w-[300px]">
-          <div className="px-5 py-4 border-b border-brand-ink">
-            <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-brand-muted">
-              Order summary
-            </span>
-          </div>
-
-          <div className="px-5 py-4 space-y-3">
-            <div className="flex justify-between font-mono text-[12.5px]">
-              <span className="text-brand-muted">Subtotal</span>
-              <span className="text-brand-ink font-semibold">${subtotal.toFixed(2)}</span>
+        <Card className="w-full shrink-0 lg:sticky lg:top-20 lg:w-[320px]">
+          <CardHeader>
+            <CardTitle>Order summary</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="font-mono font-medium text-foreground">${subtotal.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between font-mono text-[12.5px]">
-              <span className="text-brand-muted">Shipping</span>
-              <span className="text-brand-muted">TBD</span>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Shipping</span>
+              <span className="text-muted-foreground">TBD</span>
             </div>
-            <div className="border-t border-brand-line pt-3 flex justify-between font-mono text-[13.5px]">
-              <span className="text-brand-ink font-semibold">Total</span>
-              <span className="text-brand-ink font-semibold">${subtotal.toFixed(2)}</span>
+            <Separator />
+            <div className="flex justify-between text-base font-semibold text-foreground">
+              <span>Total</span>
+              <span className="font-mono">${subtotal.toFixed(2)}</span>
             </div>
-          </div>
-
-          <div className="px-5 pb-5">
+          </CardContent>
+          <CardFooter className="flex-col items-stretch gap-3">
             {error && (
-              <p className="mb-3 font-mono text-[11px] text-[#B83434] leading-snug">{error}</p>
+              <p className="rounded-lg bg-destructive/10 px-3 py-2 text-xs leading-snug text-destructive">{error}</p>
             )}
 
-            <button
+            <Button
+              size="lg"
               onClick={handlePlaceOrder}
               disabled={submitting || !billingAddr || !shippingAddr || items.length === 0}
-              className="w-full bg-brand-orange text-white font-mono text-[11px] tracking-[0.08em] uppercase px-5 py-3 hover:bg-brand-orange/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="h-10 w-full text-sm"
             >
-              {submitting ? "Placing order…" : "Place order →"}
-            </button>
+              {submitting && <Loader2 className="animate-spin" />}
+              {submitting ? "Placing order…" : "Place order"}
+              {!submitting && <ArrowRight data-icon="inline-end" />}
+            </Button>
 
-            <Link
-              href="/cart"
-              className="block mt-3 text-center font-mono text-[10.5px] tracking-[0.06em] uppercase text-brand-blue hover:text-brand-blue-deep transition-colors"
-            >
-              ← Back to cart
+            <Link href="/cart" className={cn(buttonVariants({ variant: "ghost" }), "no-underline")}>
+              <ChevronLeft data-icon="inline-start" /> Back to cart
             </Link>
-          </div>
-        </div>
+          </CardFooter>
+        </Card>
       </div>
 
       {/* Address modal — single instance, prevents simultaneous edits */}

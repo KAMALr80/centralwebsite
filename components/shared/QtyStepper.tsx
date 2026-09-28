@@ -1,5 +1,8 @@
 "use client";
 
+import { Minus, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 interface QtyStepperProps {
   value: number;
   onChange: (n: number) => void;
@@ -22,28 +25,30 @@ export function QtyStepper({
   };
 
   return (
-    <div className="inline-flex h-8 items-stretch overflow-hidden border border-brand-line bg-brand-white">
-      <button
+    <div className="inline-flex h-8 items-center rounded-md border border-border bg-card p-0.5">
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-sm"
         onClick={decrement}
         disabled={disabled || value <= min}
         aria-label="Decrease quantity"
-        className="flex w-7 items-center justify-center border-r border-brand-line bg-brand-white text-[14px] text-brand-muted transition-colors hover:bg-brand-bg-alt disabled:cursor-not-allowed disabled:text-brand-line"
       >
-        −
-      </button>
-      <span className="flex w-11 select-none items-center justify-center bg-brand-white font-mono text-[14px] text-brand-ink">
+        <Minus />
+      </Button>
+      <span className="flex w-9 select-none items-center justify-center font-mono text-[13px] text-foreground">
         {value}
       </span>
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-sm"
         onClick={increment}
         disabled={disabled || (max !== undefined && value >= max)}
         aria-label="Increase quantity"
-        className="flex w-7 items-center justify-center border-l border-brand-line bg-brand-bg-alt text-[14px] text-brand-ink transition-colors hover:bg-brand-line disabled:cursor-not-allowed disabled:text-brand-muted/40"
       >
-        +
-      </button>
+        <Plus />
+      </Button>
     </div>
   );
 }

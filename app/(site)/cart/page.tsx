@@ -3,99 +3,26 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { X, ShoppingCart } from "lucide-react";
+import { X, ShoppingCart, ImageIcon, ArrowRight, ChevronLeft, Plus, Trash2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useRequireAuth } from "@/components/auth/withAuth";
+import { QtyStepper } from "@/components/shared/QtyStepper";
+import { StepIndicator } from "@/components/shared/StepIndicator";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
-// ─── Step Indicator ────────────────────────────────────────────────────────
-
-function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
-  const steps = ["Cart", "Checkout", "Confirmation"];
-  return (
-    <div className="flex items-center gap-0">
-      {steps.map((label, i) => {
-        const n = i + 1;
-        const active = n === step;
-        const done = n < step;
-        return (
-          <div key={label} className="flex items-center">
-            <div className="flex items-center gap-2 px-4 py-2.5">
-              <span
-                className={`w-5 h-5 rounded-none flex items-center justify-center font-mono text-[10px] shrink-0 ${
-                  active
-                    ? "bg-brand-orange text-white"
-                    : done
-                    ? "bg-brand-navy text-white"
-                    : "bg-brand-bg-alt text-brand-muted border border-brand-line"
-                }`}
-              >
-                {done ? "✓" : n}
-              </span>
-              <span
-                className={`font-mono text-[10.5px] tracking-[0.06em] uppercase ${
-                  active ? "text-brand-ink" : "text-brand-muted"
-                }`}
-              >
-                {label}
-              </span>
-            </div>
-            {i < steps.length - 1 && (
-              <span className="text-brand-line font-mono text-[12px] select-none">→</span>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Image Placeholder ────────────────────────────────────────────────────
-
-function ImagePlaceholder({ size = 48 }: { size?: number }) {
-  return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        background: "repeating-linear-gradient(135deg, #E5DFD0 0 7px, #D9D3C5 7px 14px)",
-        flexShrink: 0,
-      }}
-    />
-  );
-}
-
-// ─── Qty Stepper ──────────────────────────────────────────────────────────
-
-function QtyStepper({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (n: number) => void;
-}) {
-  return (
-    <div className="inline-flex items-center border border-brand-line">
-      <button
-        onClick={() => onChange(Math.max(0, value - 1))}
-        className="w-7 h-7 flex items-center justify-center font-mono text-[14px] text-brand-ink hover:bg-brand-bg-alt transition-colors"
-      >
-        −
-      </button>
-      <span className="w-9 text-center font-mono text-[12px] text-brand-ink border-x border-brand-line h-7 flex items-center justify-center">
-        {value}
-      </span>
-      <button
-        onClick={() => onChange(value + 1)}
-        className="w-7 h-7 flex items-center justify-center font-mono text-[14px] text-brand-ink hover:bg-brand-bg-alt transition-colors"
-      >
-        +
-      </button>
-    </div>
-  );
-}
-
-// ─── Cart Page ────────────────────────────────────────────────────────────
+const TH = "text-[11px] font-medium uppercase tracking-wide text-muted-foreground";
 
 export default function CartPage() {
   const { isLoading, isAuthenticated } = useRequireAuth();
@@ -122,7 +49,7 @@ export default function CartPage() {
 
   if (isLoading || !isAuthenticated) {
     return (
-      <div className="flex items-center justify-center h-60 font-mono text-[11px] text-brand-muted tracking-widest uppercase">
+      <div className="flex h-60 items-center justify-center text-sm text-muted-foreground">
         Loading…
       </div>
     );
@@ -154,44 +81,43 @@ export default function CartPage() {
   const totalVariants = items.reduce((sum, i) => sum + i.quantity, 0);
   const totalProducts = groups.length;
 
-  const TD = "px-3 py-2.5 text-[12.5px] text-brand-ink border-b border-brand-line align-middle";
-  const TH = "px-3 py-2 font-mono text-[10px] tracking-[0.08em] uppercase text-brand-muted border-b border-brand-ink text-left bg-brand-bg-alt";
+  const subtotalLabel = hasPendingPrices
+    ? pricesRefreshing
+      ? "Updating…"
+      : "Price unavailable"
+    : `$${subtotal.toFixed(2)}`;
 
   return (
-    <div className="bg-brand-bg min-h-screen pb-20">
-      {/* Page header */}
-      <div className="px-8 py-5 border-b border-brand-line bg-brand-white">
-        <div className="flex items-start justify-between">
+    <div className="min-h-screen bg-background pb-20">
+      <div className="border-b border-border bg-card px-4 py-6 sm:px-8">
+        <div className="mx-auto flex max-w-[1400px] flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="font-serif text-[36px] font-normal text-brand-ink leading-none">
+            <h1 className="font-heading text-3xl font-semibold leading-none text-foreground">
               Cart · draft P.O.
             </h1>
-            <div className="mt-2 font-mono text-[11px] text-brand-muted tracking-[0.06em] uppercase">
+            <p className="mt-2 text-sm text-muted-foreground">
               {itemCount > 0
                 ? `${totalProducts} product${totalProducts !== 1 ? "s" : ""} · ${totalVariants} line${totalVariants !== 1 ? "s" : ""}`
                 : "Your cart is empty"}
-            </div>
+            </p>
           </div>
           <StepIndicator step={1} />
         </div>
       </div>
 
-      {/* Empty state */}
       {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-60 gap-4">
-          <ShoppingCart size={32} className="text-brand-muted" />
-          <p className="font-mono text-[12px] text-brand-muted">No items in your cart yet.</p>
-          <Link
-            href="/shop"
-            className="font-mono text-[11px] text-brand-blue hover:text-brand-blue-deep transition-colors"
-          >
-            → Browse products
+        <div className="flex h-72 flex-col items-center justify-center gap-4">
+          <div className="flex size-14 items-center justify-center rounded-full bg-muted">
+            <ShoppingCart className="size-6 text-muted-foreground" />
+          </div>
+          <p className="text-sm text-muted-foreground">No items in your cart yet.</p>
+          <Link href="/shop" className={cn(buttonVariants({ size: "lg" }), "h-9 px-4 no-underline")}>
+            Browse products <ArrowRight data-icon="inline-end" />
           </Link>
         </div>
       ) : (
         <div className="mx-auto flex max-w-[1400px] flex-col items-start gap-6 px-4 py-6 sm:px-8 lg:flex-row">
-          {/* Left — Cart groups */}
-          <div className="flex-1 min-w-0 space-y-6">
+          <div className="min-w-0 flex-1 space-y-4">
             {groups.map((group) => {
               const groupHasPendingPrices = group.items.some(
                 (item) => item.price_pending
@@ -205,35 +131,33 @@ export default function CartPage() {
               const productName = group.parentName ?? firstItem.name;
 
               return (
-                <div
-                  key={String(productId)}
-                  className="bg-brand-white border border-brand-line"
-                >
-                  {/* Group header */}
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-brand-line">
-                    {firstItem.image ? (
-                      <div className="w-12 h-12 relative overflow-hidden shrink-0 border border-brand-line">
+                <Card key={String(productId)} className="gap-0 py-0">
+                  <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3">
+                    <div className="relative size-12 shrink-0 overflow-hidden rounded-md bg-muted">
+                      {firstItem.image ? (
                         <Image
                           src={firstItem.image}
                           alt={productName ?? ""}
                           fill
                           className="object-contain"
                         />
-                      </div>
-                    ) : (
-                      <ImagePlaceholder size={48} />
-                    )}
-                    <div className="flex-1 min-w-0">
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-muted-foreground/40">
+                          <ImageIcon className="size-5" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
                       <Link
                         href={`/product/${productId}`}
-                        className="font-medium text-[13px] text-brand-ink hover:text-brand-blue transition-colors block truncate"
+                        className="block truncate text-sm font-medium text-foreground transition-colors hover:text-primary"
                       >
                         {productName}
                       </Link>
-                      <div className="font-mono text-[10.5px] text-brand-muted mt-0.5">
+                      <div className="mt-0.5 text-xs text-muted-foreground">
                         {group.items.length} line{group.items.length !== 1 ? "s" : ""}
                         {" · "}
-                        <span className="text-brand-ink">
+                        <span className="font-mono font-medium text-foreground">
                           {groupHasPendingPrices
                             ? pricesRefreshing
                               ? "Updating…"
@@ -242,165 +166,143 @@ export default function CartPage() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex shrink-0 items-center gap-1">
                       <Link
                         href={`/product/${productId}`}
-                        className="font-mono text-[10px] tracking-[0.06em] uppercase text-brand-blue hover:text-brand-blue-deep transition-colors"
+                        className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "no-underline")}
                       >
-                        + Add variant
+                        <Plus data-icon="inline-start" /> Add variant
                       </Link>
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-muted-foreground hover:text-destructive"
                         onClick={() => group.items.forEach((i) => removeItem(i.product_id))}
-                        className="font-mono text-[10px] tracking-[0.06em] uppercase text-brand-muted hover:text-[#B83434] transition-colors"
                       >
-                        Remove group
-                      </button>
+                        <Trash2 data-icon="inline-start" /> Remove
+                      </Button>
                     </div>
                   </div>
 
-                  {/* Variant rows */}
-                  <table className="w-full">
-                    <thead>
-                      <tr>
-                        <th className={TH}>SKU</th>
-                        <th className={TH}>Variant</th>
-                        <th className={`${TH} text-right`}>Unit price</th>
-                        <th className={`${TH} text-right`}>Qty</th>
-                        <th className={`${TH} text-right`}>Line total</th>
-                        <th className={`${TH} w-8`} />
-                      </tr>
-                    </thead>
-                    <tbody>
+                  <Table>
+                    <TableHeader className="bg-muted/50">
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className={cn(TH, "pl-4")}>SKU</TableHead>
+                        <TableHead className={TH}>Variant</TableHead>
+                        <TableHead className={cn(TH, "text-right")}>Unit price</TableHead>
+                        <TableHead className={cn(TH, "text-right")}>Qty</TableHead>
+                        <TableHead className={cn(TH, "text-right")}>Line total</TableHead>
+                        <TableHead className="w-10 pr-4" />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       {group.items.map((item) => (
-                        <tr key={item.product_id} className="hover:bg-brand-bg/50 transition-colors">
-                          <td className={`${TD} font-mono text-[11px] text-brand-muted w-28`}>
+                        <TableRow key={item.product_id} className="text-[12.5px]">
+                          <TableCell className="w-28 pl-4 font-mono text-[11px] text-muted-foreground">
                             {item.sku}
-                          </td>
-                          <td className={TD}>
-                            <span className="text-brand-ink">{item.name}</span>
-                          </td>
-                          <td className={`${TD} text-right font-mono`}>
+                          </TableCell>
+                          <TableCell className="whitespace-normal text-foreground">{item.name}</TableCell>
+                          <TableCell className="text-right font-mono">
                             {item.price_pending
                               ? pricesRefreshing
                                 ? "Updating…"
                                 : "Unavailable"
                               : `$${item.price.toFixed(2)}`}
-                          </td>
-                          <td className={`${TD} text-right`}>
+                          </TableCell>
+                          <TableCell className="text-right">
                             <QtyStepper
                               value={item.quantity}
                               onChange={(n) => updateQty(item.product_id, n)}
                             />
-                          </td>
-                          <td className={`${TD} text-right font-mono font-semibold`}>
+                          </TableCell>
+                          <TableCell className="text-right font-mono font-semibold">
                             {item.price_pending
                               ? "—"
                               : `$${(item.price * item.quantity).toFixed(2)}`}
-                          </td>
-                          <td className={`${TD} text-center w-8`}>
-                            <button
+                          </TableCell>
+                          <TableCell className="w-10 pr-4 text-center">
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
                               onClick={() => removeItem(item.product_id)}
-                              className="text-brand-muted hover:text-[#B83434] transition-colors"
+                              className="text-muted-foreground hover:text-destructive"
                               aria-label="Remove item"
                             >
-                              <X size={13} />
-                            </button>
-                          </td>
-                        </tr>
+                              <X />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                    </TableBody>
+                  </Table>
+                </Card>
               );
             })}
           </div>
 
-          {/* Right — Order summary */}
-          <div className="w-full shrink-0 border border-brand-line bg-brand-white lg:w-[300px]">
-            <div className="px-5 py-4 border-b border-brand-ink">
-              <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-brand-muted">
-                Order summary
-              </span>
-            </div>
-
-            <div className="px-5 py-4 space-y-3">
-              <div className="flex justify-between font-mono text-[12.5px]">
-                <span className="text-brand-muted">Subtotal</span>
-                <span className="text-brand-ink font-semibold">
-                  {hasPendingPrices
-                    ? pricesRefreshing
-                      ? "Updating…"
-                      : "Price unavailable"
-                    : `$${subtotal.toFixed(2)}`}
-                </span>
+          <Card className="w-full shrink-0 lg:sticky lg:top-20 lg:w-[320px]">
+            <CardHeader>
+              <CardTitle>Order summary</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-mono font-medium text-foreground">{subtotalLabel}</span>
               </div>
-              <div className="flex justify-between font-mono text-[12.5px]">
-                <span className="text-brand-muted">Shipping</span>
-                <span className="text-brand-muted">TBD</span>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Shipping</span>
+                <span className="text-muted-foreground">TBD</span>
               </div>
-              <div className="flex justify-between font-mono text-[12.5px]">
-                <span className="text-brand-muted">Tax</span>
-                <span className="text-brand-muted">Net of tax</span>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Tax</span>
+                <span className="text-muted-foreground">Net of tax</span>
               </div>
-              <div className="border-t border-brand-line pt-3 flex justify-between font-mono text-[13.5px]">
-                <span className="text-brand-ink font-semibold">Total</span>
-                <span className="text-brand-ink font-semibold">
-                  {hasPendingPrices
-                    ? pricesRefreshing
-                      ? "Updating…"
-                      : "Price unavailable"
-                    : `$${subtotal.toFixed(2)}`}
-                </span>
+              <Separator />
+              <div className="flex justify-between text-base font-semibold text-foreground">
+                <span>Total</span>
+                <span className="font-mono">{subtotalLabel}</span>
               </div>
-            </div>
-
-            <div className="px-5 pb-5">
+            </CardContent>
+            <CardFooter className="flex-col items-stretch gap-3">
               {isApproved && !hasPendingPrices ? (
-                <Link
-                  href="/checkout"
-                  className="block w-full bg-brand-navy text-white font-mono text-[11px] tracking-[0.08em] uppercase text-center px-5 py-3 hover:bg-brand-navy/90 transition-colors"
-                >
-                  Continue to checkout →
+                <Link href="/checkout" className={cn(buttonVariants({ size: "lg" }), "h-10 w-full text-sm no-underline")}>
+                  Continue to checkout <ArrowRight data-icon="inline-end" />
                 </Link>
               ) : hasPendingPrices ? (
-                <div className="border border-brand-line px-4 py-3 text-center">
-                  <p className="font-mono text-[11px] text-brand-muted">
+                <div className="rounded-lg bg-muted px-4 py-3 text-center">
+                  <p className="text-xs text-muted-foreground">
                     {pricesRefreshing
                       ? "Updating wholesale prices…"
                       : "Some prices are unavailable"}
                   </p>
                   {!pricesRefreshing && (
-                    <button
+                    <Button
                       type="button"
+                      variant="link"
+                      size="sm"
                       onClick={() => {
                         setPricesRefreshing(true);
                         refreshPrices().finally(() => setPricesRefreshing(false));
                       }}
-                      className="mt-2 font-mono text-[10px] uppercase tracking-[0.06em] text-brand-blue hover:text-brand-blue-deep"
                     >
                       Retry prices
-                    </button>
+                    </Button>
                   )}
                 </div>
               ) : (
-                <div className="border border-brand-line px-4 py-3 text-center">
-                  <p className="font-mono text-[11px] text-brand-muted">
-                    Account pending approval
-                  </p>
-                  <p className="font-mono text-[10px] text-brand-muted mt-1">
+                <div className="rounded-lg bg-muted px-4 py-3 text-center">
+                  <p className="text-xs font-medium text-foreground">Account pending approval</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
                     You&apos;ll be notified when your account is approved.
                   </p>
                 </div>
               )}
 
-              <Link
-                href="/shop"
-                className="block mt-3 text-center font-mono text-[10.5px] tracking-[0.06em] uppercase text-brand-blue hover:text-brand-blue-deep transition-colors"
-              >
-                ← Continue shopping
+              <Link href="/shop" className={cn(buttonVariants({ variant: "ghost" }), "no-underline")}>
+                <ChevronLeft data-icon="inline-start" /> Continue shopping
               </Link>
-            </div>
-          </div>
+            </CardFooter>
+          </Card>
         </div>
       )}
     </div>

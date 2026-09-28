@@ -1,4 +1,8 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { useState } from "react";
 import { useRequireAuth } from "@/components/auth/withAuth";
@@ -53,38 +57,41 @@ export default function ChangePasswordPage() {
     }
   }
 
-  const INPUT =
-    "w-full bg-brand-white border border-brand-line rounded-[var(--brand-radius)] px-3 py-2 font-mono text-[13px] text-brand-ink placeholder:text-brand-muted focus:outline-none focus:border-brand-blue transition-colors";
-  const LABEL = "block font-mono text-[11px] tracking-[0.06em] uppercase text-brand-muted mb-1";
+  const INPUT = "h-9 md:text-sm";
+  const LABEL = "mb-1.5 text-xs font-medium text-foreground";
 
   return (
-    <div className="bg-brand-bg min-h-screen pb-20">
+    <div className="bg-background min-h-screen pb-20">
       <PageHeader
         crumbs={[{ label: "Account", href: "/account/profile" }, { label: "Change Password" }]}
         title="Change Password"
       />
-      <div className="px-8 py-8 max-w-lg mx-auto">
+      <div className="mx-auto max-w-lg px-4 py-8 sm:px-8">
+        <Card>
+        <CardContent>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className={LABEL}>Current Password</label>
-            <input
+            <Label className={LABEL}>Current Password</Label>
+            <Input
               type="password"
               value={currentPassword}
+              aria-invalid={!!fieldErrors.current_password}
               onChange={(e) => setCurrentPassword(e.target.value)}
               className={INPUT}
               required
               autoComplete="current-password"
             />
             {fieldErrors.current_password && (
-              <p className="mt-1 font-mono text-[11px] text-[#B83434]">{fieldErrors.current_password[0]}</p>
+              <p className="mt-1 text-xs text-destructive">{fieldErrors.current_password[0]}</p>
             )}
           </div>
 
           <div>
-            <label className={LABEL}>New Password</label>
-            <input
+            <Label className={LABEL}>New Password</Label>
+            <Input
               type="password"
               value={newPassword}
+              aria-invalid={!!fieldErrors.password}
               onChange={(e) => setNewPassword(e.target.value)}
               className={INPUT}
               required
@@ -92,15 +99,16 @@ export default function ChangePasswordPage() {
               autoComplete="new-password"
             />
             {fieldErrors.password && (
-              <p className="mt-1 font-mono text-[11px] text-[#B83434]">{fieldErrors.password[0]}</p>
+              <p className="mt-1 text-xs text-destructive">{fieldErrors.password[0]}</p>
             )}
           </div>
 
           <div>
-            <label className={LABEL}>Confirm New Password</label>
-            <input
+            <Label className={LABEL}>Confirm New Password</Label>
+            <Input
               type="password"
               value={confirmPassword}
+              aria-invalid={!!fieldErrors.password_confirmation}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className={INPUT}
               required
@@ -108,25 +116,23 @@ export default function ChangePasswordPage() {
               autoComplete="new-password"
             />
             {fieldErrors.password_confirmation && (
-              <p className="mt-1 font-mono text-[11px] text-[#B83434]">{fieldErrors.password_confirmation[0]}</p>
+              <p className="mt-1 text-xs text-destructive">{fieldErrors.password_confirmation[0]}</p>
             )}
           </div>
 
           {error && !Object.keys(fieldErrors).length && (
-            <p className="font-mono text-[12px] text-[#B83434]">{error}</p>
+            <p className="rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p>
           )}
           {success && (
-            <p className="font-mono text-[12px] text-[#065F46]">Password changed successfully.</p>
+            <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-700">Password changed successfully.</p>
           )}
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full bg-brand-navy text-white font-mono text-[11px] tracking-[0.08em] uppercase py-2.5 px-4 hover:bg-brand-blue transition-colors disabled:opacity-60 cursor-pointer rounded-[var(--brand-radius)]"
-          >
+          <Button type="submit" size="lg" disabled={saving} className="h-9 w-full text-sm">
             {saving ? "Saving…" : "Change Password"}
-          </button>
+          </Button>
         </form>
+        </CardContent>
+        </Card>
       </div>
     </div>
   );

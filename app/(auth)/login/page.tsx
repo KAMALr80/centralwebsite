@@ -1,4 +1,7 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
@@ -52,26 +55,26 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full max-w-[900px] min-h-[540px] bg-brand-white flex rounded-[var(--brand-radius)] overflow-hidden shadow-lg border border-brand-line">
+    <div className="w-full max-w-[900px] min-h-[540px] bg-card flex rounded-xl overflow-hidden shadow-lg ring-1 ring-foreground/10">
       {/* Left panel — navy brand */}
-      <div className="hidden md:flex flex-col w-[280px] shrink-0 bg-brand-navy p-8 relative overflow-hidden">
+      <div className="hidden md:flex flex-col w-[280px] shrink-0 bg-foreground p-8 relative overflow-hidden">
         {/* Decorative orange circle */}
-        <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-brand-orange opacity-90" />
-        <div className="absolute right-14 bottom-8 w-20 h-20 rounded-full bg-[#0E2466] opacity-50" />
+        <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-primary opacity-90" />
+        <div className="absolute right-14 bottom-8 w-20 h-20 rounded-full bg-background/10" />
 
         <div className="relative z-10">
-          <div className="font-mono text-[10px] tracking-[0.12em] text-brand-orange/80 uppercase mb-4">
+          <div className="font-mono text-[10px] tracking-[0.12em] text-background/60 uppercase mb-4">
             WHOLESALE OS
           </div>
           <h2 className="text-white text-[22px] font-semibold leading-tight tracking-tight mb-3">
             Built for buyers, suppliers, and everyone in&nbsp;between.
           </h2>
-          <p className="text-[#9DAAC2] text-[13px] leading-relaxed">
+          <p className="text-background/60 text-[13px] leading-relaxed">
             Net terms, custom catalogs, and approval flows — without the spreadsheets.
           </p>
         </div>
 
-        <div className="mt-auto relative z-10 font-mono text-[10px] text-[#6B7A95] uppercase tracking-[0.06em]">
+        <div className="mt-auto relative z-10 font-mono text-[10px] text-background/50 uppercase tracking-[0.06em]">
           Trusted by 4,200+ wholesale teams
         </div>
       </div>
@@ -82,21 +85,21 @@ export default function LoginPage() {
           <Logo />
         </div>
 
-        <div className="font-mono text-[10px] tracking-[0.1em] text-brand-orange uppercase mb-2">
+        <div className="font-mono text-[10px] tracking-[0.1em] text-primary uppercase mb-2">
           SIGN IN
         </div>
-        <h1 className="text-[22px] font-semibold tracking-tight text-brand-ink mb-1">
+        <h1 className="text-[22px] font-semibold tracking-tight text-foreground mb-1">
           Welcome back
         </h1>
-        <p className="text-[13px] text-brand-muted mb-6">
+        <p className="text-[13px] text-muted-foreground mb-6">
           Sign in to access your wholesale account.
         </p>
 
         {/* Pending approval notice */}
         {isPending && (
-          <div className="mb-4 p-3 bg-brand-orange-soft border border-brand-orange/30 rounded-[var(--brand-radius)]">
-            <p className="text-[13px] text-brand-ink font-medium">Account pending approval</p>
-            <p className="text-[12px] text-brand-muted mt-0.5">
+          <div className="mb-4 p-3 bg-primary/10 border border-primary/30 rounded-lg">
+            <p className="text-[13px] text-foreground font-medium">Account pending approval</p>
+            <p className="text-[12px] text-muted-foreground mt-0.5">
               Your account is under review. You&apos;ll receive an email once approved.
             </p>
           </div>
@@ -104,60 +107,56 @@ export default function LoginPage() {
 
         {/* General error */}
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-[var(--brand-radius)]">
-            <p className="text-[13px] text-red-700">{error}</p>
+          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+            <p className="text-[13px] text-destructive">{error}</p>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-[12px] font-semibold text-brand-ink mb-1.5">
+            <Label className="mb-1.5 text-xs font-medium text-foreground">
               Email address
-            </label>
-            <input
+            </Label>
+            <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
               required
               autoComplete="email"
-              className="w-full h-10 px-3 border border-brand-line rounded-[var(--brand-radius)] text-[14px] text-brand-ink placeholder:text-brand-muted focus:outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/10 bg-brand-white"
+              className="h-10 md:text-sm"
             />
           </div>
 
           <div>
             <div className="flex items-baseline justify-between mb-1.5">
-              <label className="block text-[12px] font-semibold text-brand-ink">
+              <Label className="text-xs font-medium text-foreground">
                 Password
-              </label>
-              <Link href="/forgot-password" className="text-[11px] text-brand-blue hover:text-brand-blue-deep transition-colors">
+              </Label>
+              <Link href="/forgot-password" className="text-[11px] text-primary hover:text-primary/80 transition-colors">
                 Forgot password?
               </Link>
             </div>
-            <input
+            <Input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
               autoComplete="current-password"
-              className="w-full h-10 px-3 border border-brand-line rounded-[var(--brand-radius)] text-[14px] text-brand-ink placeholder:text-brand-muted focus:outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/10 bg-brand-white"
+              className="h-10 md:text-sm"
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full h-10 bg-brand-navy text-brand-white font-semibold text-[13px] rounded-[var(--brand-radius)] hover:bg-brand-blue transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
-          >
-            {loading && <Loader2 size={14} className="animate-spin" />}
+          <Button type="submit" size="lg" disabled={loading} className="mt-2 h-10 w-full text-sm">
+            {loading && <Loader2 className="animate-spin" />}
             Sign in
-          </button>
+          </Button>
         </form>
 
-        <p className="mt-6 text-[12px] text-brand-muted text-center">
+        <p className="mt-6 text-[12px] text-muted-foreground text-center">
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-brand-blue font-semibold hover:text-brand-blue-deep transition-colors">
+          <Link href="/register" className="text-primary font-semibold hover:text-primary/80 transition-colors">
             Apply for access
           </Link>
         </p>

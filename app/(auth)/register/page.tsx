@@ -1,4 +1,8 @@
 "use client";
+import { cn } from "@/lib/utils";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
@@ -65,14 +69,14 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="w-full max-w-[900px] min-h-[540px] bg-brand-white flex rounded-[var(--brand-radius)] overflow-hidden shadow-lg border border-brand-line">
+    <div className="w-full max-w-[900px] min-h-[540px] bg-card flex rounded-xl overflow-hidden shadow-lg ring-1 ring-foreground/10">
       {/* Left panel — navy brand */}
-      <div className="hidden md:flex flex-col w-[280px] shrink-0 bg-brand-navy p-8 relative overflow-hidden">
-        <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-brand-orange opacity-90" />
-        <div className="absolute right-14 bottom-8 w-20 h-20 rounded-full bg-[#0E2466] opacity-50" />
+      <div className="hidden md:flex flex-col w-[280px] shrink-0 bg-foreground p-8 relative overflow-hidden">
+        <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-primary opacity-90" />
+        <div className="absolute right-14 bottom-8 w-20 h-20 rounded-full bg-background/10" />
 
         <div className="relative z-10 space-y-4">
-          <div className="font-mono text-[10px] tracking-[0.12em] text-brand-orange/80 uppercase">
+          <div className="font-mono text-[10px] tracking-[0.12em] text-background/60 uppercase">
             JOIN THE PLATFORM
           </div>
           <h2 className="text-white text-[22px] font-semibold leading-tight tracking-tight">
@@ -85,15 +89,15 @@ export default function RegisterPage() {
               "Free returns on opening orders",
               "No exclusivity requirements",
             ].map((item) => (
-              <li key={item} className="flex items-start gap-2 text-[12px] text-[#9DAAC2]">
-                <span className="text-brand-orange mt-0.5 shrink-0">✓</span>
+              <li key={item} className="flex items-start gap-2 text-[12px] text-background/60">
+                <span className="text-primary mt-0.5 shrink-0">✓</span>
                 {item}
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="mt-auto relative z-10 font-mono text-[10px] text-[#6B7A95] uppercase tracking-[0.06em]">
+        <div className="mt-auto relative z-10 font-mono text-[10px] text-background/50 uppercase tracking-[0.06em]">
           Trusted by 4,200+ wholesale teams
         </div>
       </div>
@@ -107,20 +111,20 @@ export default function RegisterPage() {
         {success ? (
           /* Success state */
           <div className="flex flex-col items-start gap-4">
-            <CheckCircle size={40} className="text-green-500" />
+            <CheckCircle size={40} className="text-emerald-600" />
             <div>
-              <h2 className="text-[20px] font-semibold tracking-tight text-brand-ink mb-2">
+              <h2 className="text-[20px] font-semibold tracking-tight text-foreground mb-2">
                 Application submitted!
               </h2>
-              <p className="text-[14px] text-brand-muted leading-relaxed max-w-sm">
+              <p className="text-[14px] text-muted-foreground leading-relaxed max-w-sm">
                 Registration successful. Your account is pending approval before you can log in.
-                We&apos;ll email you at <strong className="text-brand-ink">{form.email}</strong> once
+                We&apos;ll email you at <strong className="text-foreground">{form.email}</strong> once
                 your account has been reviewed.
               </p>
             </div>
             <Link
               href="/login"
-              className="mt-2 inline-flex items-center gap-2 bg-brand-navy text-brand-white font-semibold text-[13px] px-5 py-2.5 rounded-[var(--brand-radius)] hover:bg-brand-blue transition-colors"
+              className={cn(buttonVariants({ size: "lg" }), "mt-2 h-10 px-5 text-sm no-underline")}
             >
               Back to sign in
             </Link>
@@ -128,110 +132,110 @@ export default function RegisterPage() {
         ) : (
           /* Registration form */
           <>
-            <div className="font-mono text-[10px] tracking-[0.1em] text-brand-orange uppercase mb-2">
+            <div className="font-mono text-[10px] tracking-[0.1em] text-primary uppercase mb-2">
               CREATE ACCOUNT
             </div>
-            <h1 className="text-[22px] font-semibold tracking-tight text-brand-ink mb-1">
+            <h1 className="text-[22px] font-semibold tracking-tight text-foreground mb-1">
               Apply for buyer access
             </h1>
-            <p className="text-[13px] text-brand-muted mb-6">
+            <p className="text-[13px] text-muted-foreground mb-6">
               Use your business email. We&apos;ll review your application within 1–2 business days.
             </p>
 
             {serverError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-[var(--brand-radius)]">
-                <p className="text-[13px] text-red-700">{serverError}</p>
+              <div className="mb-4 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+                <p className="text-[13px] text-destructive">{serverError}</p>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-3.5">
               {/* Name */}
               <div>
-                <label className="block text-[12px] font-semibold text-brand-ink mb-1.5">
+                <Label className="mb-1.5 text-xs font-medium text-foreground">
                   Full name
-                </label>
-                <input
+                </Label>
+                <Input
                   type="text"
                   value={form.name}
                   onChange={update("name")}
                   placeholder="Maya Okafor"
                   required
                   autoComplete="name"
-                  className={`w-full h-10 px-3 border rounded-[var(--brand-radius)] text-[14px] text-brand-ink placeholder:text-brand-muted focus:outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/10 bg-brand-white ${errors.name ? "border-red-400" : "border-brand-line"}`}
+                  aria-invalid={!!errors.name}
+                  className="h-10 md:text-sm"
                 />
-                {errors.name && <p className="text-[11px] text-red-600 mt-1">{errors.name}</p>}
+                {errors.name && <p className="text-[11px] text-destructive mt-1">{errors.name}</p>}
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-[12px] font-semibold text-brand-ink mb-1.5">
+                <Label className="mb-1.5 text-xs font-medium text-foreground">
                   Work email
-                </label>
-                <input
+                </Label>
+                <Input
                   type="email"
                   value={form.email}
                   onChange={update("email")}
                   placeholder="you@company.com"
                   required
                   autoComplete="email"
-                  className={`w-full h-10 px-3 border rounded-[var(--brand-radius)] text-[14px] text-brand-ink placeholder:text-brand-muted focus:outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/10 bg-brand-white ${errors.email ? "border-red-400" : "border-brand-line"}`}
+                  aria-invalid={!!errors.email}
+                  className="h-10 md:text-sm"
                 />
-                {errors.email && <p className="text-[11px] text-red-600 mt-1">{errors.email}</p>}
+                {errors.email && <p className="text-[11px] text-destructive mt-1">{errors.email}</p>}
               </div>
 
               {/* Password */}
               <div>
-                <label className="block text-[12px] font-semibold text-brand-ink mb-1.5">
+                <Label className="mb-1.5 text-xs font-medium text-foreground">
                   Password
-                </label>
-                <input
+                </Label>
+                <Input
                   type="password"
                   value={form.password}
                   onChange={update("password")}
                   placeholder="••••••••"
                   required
                   autoComplete="new-password"
-                  className={`w-full h-10 px-3 border rounded-[var(--brand-radius)] text-[14px] text-brand-ink placeholder:text-brand-muted focus:outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/10 bg-brand-white ${errors.password ? "border-red-400" : "border-brand-line"}`}
+                  aria-invalid={!!errors.password}
+                  className="h-10 md:text-sm"
                 />
                 {errors.password ? (
-                  <p className="text-[11px] text-red-600 mt-1">{errors.password}</p>
+                  <p className="text-[11px] text-destructive mt-1">{errors.password}</p>
                 ) : (
-                  <p className="text-[11px] text-brand-muted mt-1">Minimum 8 characters.</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">Minimum 8 characters.</p>
                 )}
               </div>
 
               {/* Confirm password */}
               <div>
-                <label className="block text-[12px] font-semibold text-brand-ink mb-1.5">
+                <Label className="mb-1.5 text-xs font-medium text-foreground">
                   Confirm password
-                </label>
-                <input
+                </Label>
+                <Input
                   type="password"
                   value={form.password_confirmation}
                   onChange={update("password_confirmation")}
                   placeholder="••••••••"
                   required
                   autoComplete="new-password"
-                  className={`w-full h-10 px-3 border rounded-[var(--brand-radius)] text-[14px] text-brand-ink placeholder:text-brand-muted focus:outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/10 bg-brand-white ${errors.password_confirmation ? "border-red-400" : "border-brand-line"}`}
+                  aria-invalid={!!errors.password_confirmation}
+                  className="h-10 md:text-sm"
                 />
                 {errors.password_confirmation && (
-                  <p className="text-[11px] text-red-600 mt-1">{errors.password_confirmation}</p>
+                  <p className="text-[11px] text-destructive mt-1">{errors.password_confirmation}</p>
                 )}
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full h-10 bg-brand-navy text-brand-white font-semibold text-[13px] rounded-[var(--brand-radius)] hover:bg-brand-blue transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed mt-1"
-              >
-                {loading && <Loader2 size={14} className="animate-spin" />}
+              <Button type="submit" size="lg" disabled={loading} className="mt-1 h-10 w-full text-sm">
+                {loading && <Loader2 className="animate-spin" />}
                 Submit application
-              </button>
+              </Button>
             </form>
 
-            <p className="mt-5 text-[12px] text-brand-muted text-center">
+            <p className="mt-5 text-[12px] text-muted-foreground text-center">
               Already have an account?{" "}
-              <Link href="/login" className="text-brand-blue font-semibold hover:text-brand-blue-deep transition-colors">
+              <Link href="/login" className="text-primary font-semibold hover:text-primary/80 transition-colors">
                 Sign in
               </Link>
             </p>

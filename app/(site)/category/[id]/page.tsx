@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { use } from "react";
 import { BrowseLayout } from "@/components/browse/BrowseLayout";
 import { useCategory } from "@/hooks/useCategories";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -15,7 +16,7 @@ function CategoryBrowse({ id }: { id: string }) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-40 font-mono text-[11px] text-brand-muted tracking-widest uppercase">
+      <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
         Loading…
       </div>
     );
@@ -24,8 +25,8 @@ function CategoryBrowse({ id }: { id: string }) {
   if (!Number.isInteger(numericId) || numericId <= 0 || isError || !category) {
     return (
       <div className="flex h-60 flex-col items-center justify-center gap-4 text-center">
-        <p className="font-mono text-[12px] text-brand-muted">Category not found.</p>
-        {isError && <button type="button" onClick={() => refetch()} className="bg-brand-navy px-5 py-2 text-xs font-bold text-white">Try again</button>}
+        <p className="text-sm text-muted-foreground">Category not found.</p>
+        {isError && <Button type="button" onClick={() => refetch()}>Try again</Button>}
       </div>
     );
   }

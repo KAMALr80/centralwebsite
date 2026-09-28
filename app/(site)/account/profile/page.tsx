@@ -1,4 +1,9 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 import { useState } from "react";
 import { useRequireAuth } from "@/components/auth/withAuth";
@@ -43,15 +48,14 @@ function EditProfileForm({
     }
   }
 
-  const INPUT =
-    "w-full bg-brand-white border border-brand-line rounded-[var(--brand-radius)] px-3 py-2 font-mono text-[13px] text-brand-ink placeholder:text-brand-muted focus:outline-none focus:border-brand-blue transition-colors";
-  const LABEL = "block font-mono text-[11px] tracking-[0.06em] uppercase text-brand-muted mb-1";
+  const INPUT = "h-9 md:text-sm";
+  const LABEL = "mb-1.5 text-xs font-medium text-foreground";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className={LABEL}>Full Name</label>
-        <input
+        <Label className={LABEL}>Full Name</Label>
+        <Input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -62,8 +66,8 @@ function EditProfileForm({
       </div>
 
       <div>
-        <label className={LABEL}>Email Address</label>
-        <input
+        <Label className={LABEL}>Email Address</Label>
+        <Input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -73,8 +77,8 @@ function EditProfileForm({
       </div>
 
       <div>
-        <label className={LABEL}>Phone Number</label>
-        <input
+        <Label className={LABEL}>Phone Number</Label>
+        <Input
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
@@ -85,11 +89,11 @@ function EditProfileForm({
       </div>
 
       <div>
-        <label className={LABEL}>Address</label>
-        <textarea
+        <Label className={LABEL}>Address</Label>
+        <Textarea
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          className={`${INPUT} resize-none`}
+          className="resize-none md:text-sm"
           rows={3}
           maxLength={500}
           placeholder="Optional"
@@ -97,19 +101,15 @@ function EditProfileForm({
       </div>
 
       {error && (
-        <p className="font-mono text-[12px] text-[#B83434]">{error}</p>
+        <p className="rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p>
       )}
       {success && (
-        <p className="font-mono text-[12px] text-[#065F46]">Profile updated successfully.</p>
+        <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-700">Profile updated successfully.</p>
       )}
 
-      <button
-        type="submit"
-        disabled={saving}
-        className="w-full bg-brand-navy text-white font-mono text-[11px] tracking-[0.08em] uppercase py-2.5 px-4 hover:bg-brand-blue transition-colors disabled:opacity-60 cursor-pointer rounded-[var(--brand-radius)]"
-      >
+      <Button type="submit" size="lg" disabled={saving} className="h-9 w-full text-sm">
         {saving ? "Saving…" : "Save Changes"}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -121,10 +121,14 @@ export default function EditProfilePage() {
   if (isLoading || !user) return null;
 
   return (
-    <div className="bg-brand-bg min-h-screen pb-20">
+    <div className="bg-background min-h-screen pb-20">
       <PageHeader crumbs={[{ label: "Account", href: "/account/profile" }, { label: "Edit Profile" }]} title="Edit Profile" />
-      <div className="px-8 py-8 max-w-lg mx-auto">
-        <EditProfileForm key={user.id} user={user} updateUser={updateUser} />
+      <div className="mx-auto max-w-lg px-4 py-8 sm:px-8">
+        <Card>
+          <CardContent>
+            <EditProfileForm key={user.id} user={user} updateUser={updateUser} />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

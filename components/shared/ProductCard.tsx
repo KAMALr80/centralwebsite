@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Heart } from "lucide-react";
+import { Heart, ImageIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { StockDot } from "./StockDot";
 import { PriceGate } from "./PriceGate";
 import { type Product } from "@/hooks/useProducts";
@@ -22,21 +23,17 @@ interface ProductCardProps {
 
 function ImagePlaceholder() {
   return (
-    <div
-      className="w-full h-full"
-      style={{
-        background:
-          "repeating-linear-gradient(135deg, #E5DFD0 0 14px, #D9D3C5 14px 28px)",
-      }}
-    />
+    <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground/40">
+      <ImageIcon className="size-8" />
+    </div>
   );
 }
 
 export function ProductCard({ product, onWishlistToggle, wishlisted = false }: ProductCardProps) {
   return (
-    <div className="relative bg-brand-white border border-brand-line rounded-[var(--brand-radius)] overflow-hidden group hover:border-brand-blue hover:shadow-md transition-[border-color,box-shadow]">
+    <div className="relative bg-card border border-border rounded-lg overflow-hidden group hover:border-primary hover:shadow-md transition-[border-color,box-shadow]">
       {/* Image */}
-      <Link href={`/product/${product.id}`} className="block relative aspect-[4/3] overflow-hidden bg-brand-bg-alt">
+      <Link href={`/product/${product.id}`} className="block relative aspect-[4/3] overflow-hidden bg-muted">
         {product.image ? (
           <Image
             src={product.image}
@@ -49,9 +46,7 @@ export function ProductCard({ product, onWishlistToggle, wishlisted = false }: P
           <ImagePlaceholder />
         )}
         {product.on_sale && (
-          <span className="absolute top-2 left-2 bg-[#B83434] text-white font-mono text-[9px] tracking-[0.06em] px-1.5 py-0.5">
-            SALE
-          </span>
+          <Badge className="absolute top-2 left-2 bg-destructive font-mono text-white">Sale</Badge>
         )}
       </Link>
 
@@ -60,13 +55,13 @@ export function ProductCard({ product, onWishlistToggle, wishlisted = false }: P
         {product.brand?.name && (
           <Link
             href={product.brand.id ? `/brand/${product.brand.id}` : "/brands"}
-            className="font-mono text-[10px] tracking-[0.06em] text-brand-blue uppercase hover:text-brand-blue-deep transition-colors"
+            className="font-mono text-[10px] tracking-[0.06em] text-primary uppercase hover:text-primary/80 transition-colors"
           >
             {product.brand.name}
           </Link>
         )}
         <Link href={`/product/${product.id}`} className="block mt-0.5">
-          <h3 className="text-[13px] font-bold uppercase text-brand-blue leading-snug line-clamp-2 hover:text-brand-blue-deep transition-colors">
+          <h3 className="text-[13px] font-semibold text-foreground leading-snug line-clamp-2 hover:text-primary transition-colors">
             {product.name}
           </h3>
         </Link>
@@ -75,11 +70,11 @@ export function ProductCard({ product, onWishlistToggle, wishlisted = false }: P
           <PriceGate pricesVisible={product.prices_visible}>
             {product.on_sale && product.sale_price !== null ? (
               <span className="flex items-baseline gap-1.5 font-mono text-[13px]">
-                <span className="text-[#B83434] font-semibold">${product.sale_price.toFixed(2)}</span>
-                <span className="text-brand-muted line-through text-[11px]">${product.regular_price?.toFixed(2)}</span>
+                <span className="text-destructive font-semibold">${product.sale_price.toFixed(2)}</span>
+                <span className="text-muted-foreground line-through text-[11px]">${product.regular_price?.toFixed(2)}</span>
               </span>
             ) : (
-              <span className="font-mono text-[13px] font-semibold text-brand-navy">
+              <span className="font-mono text-[13px] font-semibold text-foreground">
                 {product.current_price !== null ? `$${product.current_price.toFixed(2)}` : "—"}
               </span>
             )}
@@ -93,12 +88,12 @@ export function ProductCard({ product, onWishlistToggle, wishlisted = false }: P
       {onWishlistToggle && (
         <button
           onClick={() => onWishlistToggle(product.id)}
-          className="absolute top-2 right-2 w-7 h-7 bg-white/80 rounded-none flex items-center justify-center hover:bg-white transition-colors"
+          className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full bg-background/80 shadow-sm backdrop-blur transition-colors hover:bg-background"
           aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Heart
             size={14}
-            className={wishlisted ? "text-[#B83434] fill-[#B83434]" : "text-brand-muted"}
+            className={wishlisted ? "text-destructive fill-destructive" : "text-muted-foreground"}
           />
         </button>
       )}

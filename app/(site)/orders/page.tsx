@@ -2,34 +2,32 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
+import { Package } from "lucide-react";
 import { useRequireApproved } from "@/components/auth/withAuth";
-import { useOrders, type OrderStatus, type PaymentStatus } from "@/hooks/useOrders";
+import { useOrders, type PaymentStatus } from "@/hooks/useOrders";
 import { Pagination } from "@/components/shared/Pagination";
 import { PageHeader } from "@/components/shared/PageHeader";
-
-const STATUS_STYLES: Record<OrderStatus, string> = {
-  pending: "bg-[#E5DFD0] text-[#6B6045]",
-  processing: "bg-[#DBEAFE] text-[#1D4ED8]",
-  shipped: "bg-[#FEE9D6] text-brand-orange",
-  delivered: "bg-[#D1FAE5] text-[#065F46]",
-  cancelled: "bg-[#FEE2E2] text-[#B83434]",
-};
+import { OrderStatusBadge } from "@/components/shared/OrderStatusBadge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 const PAYMENT_STYLES: Record<PaymentStatus, string> = {
-  due: "text-brand-muted",
-  paid: "text-[#065F46]",
-  refunded: "text-[#1D4ED8]",
+  due: "text-muted-foreground",
+  paid: "text-emerald-700",
+  refunded: "text-primary",
 };
 
-function StatusBadge({ status }: { status: OrderStatus }) {
-  return (
-    <span
-      className={`inline-block font-mono text-[10px] tracking-[0.06em] uppercase px-2 py-0.5 rounded-[var(--brand-radius)] ${STATUS_STYLES[status] ?? "bg-brand-bg-alt text-brand-muted"}`}
-    >
-      {status}
-    </span>
-  );
-}
+const TH = "text-[11px] font-medium uppercase tracking-wide text-muted-foreground";
 
 function OrdersTable() {
   const { isLoading, isAuthenticated, isApproved } = useRequireApproved();
@@ -38,30 +36,30 @@ function OrdersTable() {
 
   if (isLoading || !isAuthenticated || !isApproved || ordersLoading) {
     return (
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse bg-brand-white">
-          <tbody>
+      <Card className="gap-0 py-0">
+        <Table>
+          <TableBody>
             {Array.from({ length: 6 }).map((_, i) => (
-              <tr key={i} className="border-b border-brand-line">
+              <TableRow key={i}>
                 {Array.from({ length: 5 }).map((__, j) => (
-                  <td key={j} className="px-4 py-3">
-                    <div className="h-4 bg-brand-bg-alt rounded-none animate-pulse" />
-                  </td>
+                  <TableCell key={j} className="px-4 py-3">
+                    <Skeleton className="h-4" />
+                  </TableCell>
                 ))}
-              </tr>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
     );
   }
 
   if (isError) {
     return (
-      <div className="border border-brand-line border-t-2 border-t-red-600 bg-brand-white py-12 text-center">
-        <p className="font-mono text-[12px] text-brand-muted">Orders could not be loaded.</p>
-        <button type="button" onClick={() => refetch()} className="mt-4 bg-brand-navy px-5 py-2 text-xs font-bold text-white hover:bg-brand-blue">Try again</button>
-      </div>
+      <Card className="items-center py-12 text-center">
+        <p className="text-sm text-muted-foreground">Orders could not be loaded.</p>
+        <Button type="button" onClick={() => refetch()}>Try again</Button>
+      </Card>
     );
   }
 
@@ -70,70 +68,73 @@ function OrdersTable() {
 
   if (orders.length === 0) {
     return (
-      <div className="flex h-40 flex-col items-center justify-center gap-3 border border-brand-line border-t-2 border-t-brand-orange bg-brand-white">
-        <p className="font-mono text-[12px] uppercase tracking-[0.06em] text-brand-muted">No orders yet.</p>
-        <Link href="/shop" className="bg-brand-navy px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.06em] text-white transition-colors hover:bg-brand-blue">
+      <Card className="items-center py-14 text-center">
+        <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+          <Package className="size-5 text-muted-foreground" />
+        </div>
+        <p className="text-sm text-muted-foreground">No orders yet.</p>
+        <Link href="/shop" className={cn(buttonVariants({ size: "lg" }), "h-9 px-4 no-underline")}>
           Browse products
         </Link>
-      </div>
+      </Card>
     );
   }
 
-  const TH = "px-4 py-2.5 font-mono text-[10px] tracking-[0.08em] uppercase text-brand-muted border-b border-brand-ink text-left bg-brand-bg-alt";
-  const TD = "px-4 py-3 text-[12.5px] text-brand-ink border-b border-brand-line align-middle";
-
   return (
     <>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse bg-brand-white">
-          <thead>
-            <tr>
-              <th className={TH}>Invoice #</th>
-              <th className={TH}>Date</th>
-              <th className={TH}>Status</th>
-              <th className={TH}>Payment</th>
-              <th className={`${TH} text-right`}>Total</th>
-            </tr>
-          </thead>
-          <tbody>
+      <Card className="gap-0 py-0">
+        <Table>
+          <TableHeader className="bg-muted/50">
+            <TableRow className="hover:bg-transparent">
+              <TableHead className={cn(TH, "pl-4")}>Invoice #</TableHead>
+              <TableHead className={TH}>Date</TableHead>
+              <TableHead className={TH}>Status</TableHead>
+              <TableHead className={TH}>Payment</TableHead>
+              <TableHead className={cn(TH, "pr-4 text-right")}>Total</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {orders.map((order) => (
-              <tr key={order.id} className="hover:bg-brand-bg transition-colors">
-                <td className={TD}>
+              <TableRow key={order.id} className="text-[12.5px]">
+                <TableCell className="py-3 pl-4">
                   <Link
                     href={`/orders/${order.id}`}
-                    className="font-mono text-[12px] text-brand-blue hover:text-brand-blue-deep transition-colors"
+                    className="font-mono text-[12px] font-medium text-primary transition-colors hover:text-primary/80"
                   >
                     {order.invoice_no}
                   </Link>
-                </td>
-                <td className={`${TD} font-mono text-[11.5px] text-brand-muted`}>
+                </TableCell>
+                <TableCell className="font-mono text-muted-foreground">
                   {new Date(order.created_at).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
                   })}
-                </td>
-                <td className={TD}>
-                  <StatusBadge status={order.status} />
-                </td>
-                <td className={TD}>
+                </TableCell>
+                <TableCell>
+                  <OrderStatusBadge status={order.status} />
+                </TableCell>
+                <TableCell>
                   <span
-                    className={`font-mono text-[11.5px] capitalize ${order.payment_status ? PAYMENT_STYLES[order.payment_status] : "text-brand-muted"}`}
+                    className={cn(
+                      "font-mono capitalize",
+                      order.payment_status ? PAYMENT_STYLES[order.payment_status] : "text-muted-foreground"
+                    )}
                   >
                     {order.payment_status ?? "—"}
                   </span>
-                </td>
-                <td className={`${TD} text-right font-mono font-semibold`}>
+                </TableCell>
+                <TableCell className="pr-4 text-right font-mono font-semibold">
                   ${order.total.toFixed(2)}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
 
       {meta && meta.last_page > 1 && (
-        <div className="flex justify-center mt-6">
+        <div className="mt-6 flex justify-center">
           <Pagination
             currentPage={meta.current_page}
             lastPage={meta.last_page}
@@ -147,12 +148,12 @@ function OrdersTable() {
 
 export default function OrdersPage() {
   return (
-    <div className="bg-brand-bg min-h-screen pb-20">
+    <div className="min-h-screen bg-background pb-20">
       <PageHeader
         crumbs={[{ label: "Orders" }]}
         title="Your orders"
       />
-      <div className="px-8 py-6 max-w-5xl mx-auto">
+      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-8">
         <Suspense>
           <OrdersTable />
         </Suspense>

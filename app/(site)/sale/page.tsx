@@ -7,11 +7,11 @@ function SaleInner() {
   return (
     <div>
       {/* Promo banner */}
-      <div className="bg-[#B83434] text-white px-8 py-3 flex items-center justify-between">
-        <span className="font-mono text-[11px] tracking-[0.12em] uppercase font-medium">
+      <div className="flex flex-wrap items-center justify-between gap-2 bg-destructive px-4 py-2.5 text-white sm:px-8">
+        <span className="text-xs font-semibold uppercase tracking-wide">
           Sale · Ends soon
         </span>
-        <span className="font-mono text-[10px] tracking-[0.08em] uppercase text-white/70">
+        <span className="text-xs text-white/80">
           Wholesale discounts on selected lines
         </span>
       </div>

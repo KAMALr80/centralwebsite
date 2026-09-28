@@ -1,8 +1,15 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, type ReactNode } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { X, SlidersHorizontal, LayoutList, LayoutGrid } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ProductTable } from "@/components/shared/ProductTable";
 import { ProductGrid } from "@/components/shared/ProductGrid";
@@ -277,7 +284,7 @@ export function BrowseLayout({
   const activeSubCatName = sidebarSubCats.find((sc) => sc.id === subCatId)?.name;
 
   return (
-    <div className="bg-brand-bg min-h-screen pb-20">
+    <div className="bg-background min-h-screen pb-20">
       <PageHeader
         crumbs={
           crumbs ?? [
@@ -291,250 +298,199 @@ export function BrowseLayout({
 
       {/* Sub-category pills — category pages only */}
       {subCategories.length > 0 && (
-        <div className="px-8 py-3 border-b border-brand-line bg-brand-white flex items-center gap-2 flex-wrap">
-          <button
+        <div className="flex flex-wrap items-center gap-2 border-b border-border bg-card px-4 py-3 sm:px-8">
+          <Button
+            variant={!subCatId ? "default" : "outline"}
+            size="sm"
+            className="rounded-full px-3"
             onClick={() => setParam("sub_cat", null)}
-            className={`px-3 py-1 text-[11.5px] border rounded-[var(--brand-radius)] transition-colors ${
-              !subCatId
-                ? "bg-brand-ink text-white border-brand-ink"
-                : "bg-brand-white text-brand-ink border-brand-line hover:border-brand-ink"
-            }`}
           >
             All
-          </button>
+          </Button>
           {subCategories.map((sc) => (
-            <button
+            <Button
               key={sc.id}
+              variant={subCatId === sc.id ? "default" : "outline"}
+              size="sm"
+              className="rounded-full px-3"
               onClick={() => setParam("sub_cat", String(sc.id))}
-              className={`px-3 py-1 text-[11.5px] border rounded-[var(--brand-radius)] transition-colors inline-flex items-center gap-1.5 ${
-                subCatId === sc.id
-                  ? "bg-brand-ink text-white border-brand-ink"
-                  : "bg-brand-white text-brand-ink border-brand-line hover:border-brand-ink"
-              }`}
             >
               {sc.name}
               {sc.products_count !== undefined && (
                 <span className="font-mono text-[9.5px] opacity-60">{sc.products_count}</span>
               )}
-            </button>
+            </Button>
           ))}
         </div>
       )}
 
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 pt-4 sm:px-8 lg:flex-row">
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 pt-6 sm:px-8 lg:flex-row">
         {/* ── Filters sidebar ──────────────────────────────── */}
-        <aside className="w-full shrink-0 text-[12.5px] lg:w-[220px]">
-          <div className="flex items-center justify-between pb-2 border-b border-brand-ink mb-3">
-            <span className="font-mono text-[10px] tracking-[0.08em] uppercase flex items-center gap-1.5">
-              <SlidersHorizontal size={11} />
-              FILTERS{activeFilterCount > 0 && ` · ${activeFilterCount}`}
-            </span>
-            {activeFilterCount > 0 && (
-              <button
-                onClick={clearAll}
-                className="text-[11px] text-brand-orange hover:text-brand-ink transition-colors"
-              >
-                Clear all
-              </button>
-            )}
-          </div>
-
-          {/* In stock */}
-          <div className="mb-4 pb-4 border-b border-brand-line">
-            <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-ink mb-2">
-              Stock
+        <aside className="w-full shrink-0 lg:w-[240px]">
+          <Card size="sm" className="gap-0 py-0">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                <SlidersHorizontal className="size-3.5" />
+                Filters
+                {activeFilterCount > 0 && <Badge variant="secondary">{activeFilterCount}</Badge>}
+              </span>
+              {activeFilterCount > 0 && (
+                <Button variant="link" size="xs" className="h-auto px-0" onClick={clearAll}>
+                  Clear all
+                </Button>
+              )}
             </div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
+
+            <FilterSection title="Stock">
+              <FilterOption
                 checked={inStock}
-                onChange={(e) => setParam("in_stock", e.target.checked ? "true" : null)}
-                className="w-3 h-3 accent-brand-blue"
+                onCheckedChange={(checked) => setParam("in_stock", checked ? "true" : null)}
+                label="In stock now"
               />
-              <span>In stock now</span>
-            </label>
-          </div>
+            </FilterSection>
 
-          {/* Brand filter */}
-          {!brandId && (
-            <div className="mb-4 pb-4 border-b border-brand-line">
-              <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-ink mb-2 flex justify-between">
-                <span>Brand</span>
-                {activeBrandIds.length > 0 && (
-                  <span className="text-brand-muted">{activeBrandIds.length} selected</span>
-                )}
-              </div>
-              <input
-                type="text"
-                value={brandSearch}
-                onChange={(e) => setBrandSearch(e.target.value)}
-                placeholder="Search brands…"
-                className="w-full h-7 px-2 mb-2 border border-brand-line text-[11.5px] bg-brand-white focus:outline-none focus:border-brand-blue rounded-[var(--brand-radius)] placeholder:text-brand-muted"
-              />
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                {filteredBrands.length === 0 ? (
-                  <p className="text-[11.5px] text-brand-muted">No brands found</p>
-                ) : (
-                  filteredBrands.map((b) => (
-                    <label key={b.id} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
+            {!brandId && (
+              <FilterSection
+                title="Brand"
+                aside={activeBrandIds.length > 0 ? `${activeBrandIds.length} selected` : undefined}
+              >
+                <Input
+                  value={brandSearch}
+                  onChange={(e) => setBrandSearch(e.target.value)}
+                  placeholder="Search brands…"
+                  className="mb-2"
+                />
+                <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
+                  {filteredBrands.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No brands found</p>
+                  ) : (
+                    filteredBrands.map((b) => (
+                      <FilterOption
+                        key={b.id}
                         checked={activeBrandIds.includes(b.id)}
-                        onChange={() => toggleBrand(b.id)}
-                        className="w-3 h-3 accent-brand-blue shrink-0"
+                        onCheckedChange={() => toggleBrand(b.id)}
+                        label={b.name}
                       />
-                      <span className="text-[12px] text-brand-ink truncate">{b.name}</span>
-                    </label>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
+                    ))
+                  )}
+                </div>
+              </FilterSection>
+            )}
 
-          {/* Category filter — hidden on fixed category pages */}
-          {!categoryId && (
-            <div className="mb-4 pb-4 border-b border-brand-line">
-              <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-ink mb-2">
-                Category
-              </div>
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                {(allCategories ?? []).slice().sort((a, b) => a.name.localeCompare(b.name)).map((cat) => (
-                  <label key={cat.id} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
+            {!categoryId && (
+              <FilterSection title="Category">
+                <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
+                  {(allCategories ?? []).slice().sort((a, b) => a.name.localeCompare(b.name)).map((cat) => (
+                    <FilterOption
+                      key={cat.id}
                       checked={catId === cat.id}
-                      onChange={() => toggleCategory(cat.id)}
-                      className="w-3 h-3 accent-brand-blue shrink-0"
+                      onCheckedChange={() => toggleCategory(cat.id)}
+                      label={cat.name}
                     />
-                    <span className="text-[12px] text-brand-ink truncate">{cat.name}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
+                  ))}
+                </div>
+              </FilterSection>
+            )}
 
-          {/* Sub-category filter — shown when parent has children */}
-          {sidebarSubCats.length > 0 && (
-            <div className="mb-4 pb-4 border-b border-brand-line">
-              <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-brand-ink mb-2">
-                Sub-category
-              </div>
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                {sidebarSubCats.map((sc) => (
-                  <label key={sc.id} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
+            {sidebarSubCats.length > 0 && (
+              <FilterSection title="Sub-category">
+                <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
+                  {sidebarSubCats.map((sc) => (
+                    <FilterOption
+                      key={sc.id}
                       checked={subCatId === sc.id}
-                      onChange={() =>
+                      onCheckedChange={() =>
                         setParam("sub_cat", subCatId === sc.id ? null : String(sc.id))
                       }
-                      className="w-3 h-3 accent-brand-blue shrink-0"
+                      label={sc.name}
                     />
-                    <span className="text-[12px] text-brand-ink truncate">{sc.name}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-
+                  ))}
+                </div>
+              </FilterSection>
+            )}
+          </Card>
         </aside>
 
         {/* ── Main: toolbar + table + pagination ─────────── */}
-        <main className="flex-1 min-w-0">
-          <div className="mb-0 flex flex-col items-start justify-between gap-3 border-b border-brand-ink py-2.5 md:flex-row md:items-center">
-            <div className="flex items-center gap-3 font-mono text-[11px] tracking-[0.04em] text-brand-muted uppercase flex-wrap">
+        <main className="min-w-0 flex-1">
+          <div className="mb-3 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               {meta && (
                 <span>
-                  <span className="text-brand-ink">{meta.total.toLocaleString()} SKUs</span>
+                  <span className="font-semibold text-foreground">{meta.total.toLocaleString()} SKUs</span>
                   {meta.from && meta.to && ` · ${meta.from}–${meta.to}`}
                 </span>
               )}
               {inStock && (
-                <button
-                  onClick={() => setParam("in_stock", null)}
-                  className="flex items-center gap-1 px-2 py-0.5 border border-brand-line bg-brand-white text-brand-ink text-[10.5px] normal-case tracking-normal rounded-[var(--brand-radius)] hover:border-brand-ink"
-                >
-                  In stock <X size={10} />
-                </button>
+                <FilterChip onRemove={() => setParam("in_stock", null)}>In stock</FilterChip>
               )}
               {activeBrandIds.map((bid) => {
                 const brand = (allBrands ?? []).find((b) => b.id === bid);
                 return (
-                  <button
-                    key={bid}
-                    onClick={() => toggleBrand(bid)}
-                    className="flex items-center gap-1 px-2 py-0.5 border border-brand-line bg-brand-white text-brand-ink text-[10.5px] normal-case tracking-normal rounded-[var(--brand-radius)] hover:border-brand-ink"
-                  >
-                    {brand?.name ?? bid} <X size={10} />
-                  </button>
+                  <FilterChip key={bid} onRemove={() => toggleBrand(bid)}>
+                    {brand?.name ?? bid}
+                  </FilterChip>
                 );
               })}
               {!categoryId && catId && (
-                <button
-                  onClick={() => toggleCategory(catId)}
-                  className="flex items-center gap-1 px-2 py-0.5 border border-brand-line bg-brand-white text-brand-ink text-[10.5px] normal-case tracking-normal rounded-[var(--brand-radius)] hover:border-brand-ink"
-                >
-                  {activeCatName ?? catId} <X size={10} />
-                </button>
+                <FilterChip onRemove={() => toggleCategory(catId)}>{activeCatName ?? catId}</FilterChip>
               )}
               {subCatId && (
-                <button
-                  onClick={() => setParam("sub_cat", null)}
-                  className="flex items-center gap-1 px-2 py-0.5 border border-brand-line bg-brand-white text-brand-ink text-[10.5px] normal-case tracking-normal rounded-[var(--brand-radius)] hover:border-brand-ink"
-                >
-                  {activeSubCatName ?? subCatId} <X size={10} />
-                </button>
+                <FilterChip onRemove={() => setParam("sub_cat", null)}>{activeSubCatName ?? subCatId}</FilterChip>
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center border border-brand-line rounded-[var(--brand-radius)] overflow-hidden">
-                <button
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-0.5 rounded-md border border-border bg-card p-0.5">
+                <Button
+                  variant={view === "list" ? "secondary" : "ghost"}
+                  size="icon-sm"
                   onClick={() => switchView("list")}
-                  title="List view"
-                  className={`px-2 py-1.5 transition-colors ${
-                    view === "list"
-                      ? "bg-brand-ink text-white"
-                      : "bg-brand-white text-brand-muted hover:text-brand-ink"
-                  }`}
+                  aria-pressed={view === "list"}
+                  aria-label="List view"
                 >
-                  <LayoutList size={13} />
-                </button>
-                <button
+                  <LayoutList />
+                </Button>
+                <Button
+                  variant={view === "grid" ? "secondary" : "ghost"}
+                  size="icon-sm"
                   onClick={() => switchView("grid")}
-                  title="Grid view"
-                  className={`px-2 py-1.5 transition-colors border-l border-brand-line ${
-                    view === "grid"
-                      ? "bg-brand-ink text-white"
-                      : "bg-brand-white text-brand-muted hover:text-brand-ink"
-                  }`}
+                  aria-pressed={view === "grid"}
+                  aria-label="Grid view"
                 >
-                  <LayoutGrid size={13} />
-                </button>
+                  <LayoutGrid />
+                </Button>
               </div>
 
-              <span className="font-mono text-[10px] tracking-[0.06em] uppercase text-brand-muted">
-                SORT
-              </span>
-              <select
+              <Select
+                items={SORT_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
                 value={sort}
-                onChange={(e) => setParam("sort", e.target.value)}
-                className="h-7 px-2 border border-brand-line text-[11.5px] bg-brand-white rounded-[var(--brand-radius)] focus:outline-none focus:border-brand-blue"
+                onValueChange={(value) => {
+                  if (value) setParam("sort", value);
+                }}
               >
-                {SORT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="min-w-36 bg-card" aria-label="Sort products">
+                  <span className="text-muted-foreground">Sort:</span>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SORT_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           {isError ? (
-            <div className="mt-3 border border-brand-line border-t-2 border-t-red-600 bg-brand-white px-5 py-12 text-center">
-              <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-brand-muted">Products could not be loaded.</p>
-              <button type="button" onClick={() => refetch()} className="mt-4 bg-brand-navy px-5 py-2.5 text-[11px] font-bold uppercase text-white hover:bg-brand-blue">Try again</button>
-            </div>
+            <Card className="items-center py-12 text-center">
+              <p className="text-sm text-muted-foreground">Products could not be loaded.</p>
+              <Button type="button" onClick={() => refetch()}>
+                Try again
+              </Button>
+            </Card>
           ) : view === "grid" ? (
             <ProductGrid
               products={products}
@@ -554,7 +510,7 @@ export function BrowseLayout({
           )}
 
           {!isError && meta && meta.last_page > 1 && (
-            <div className="flex justify-center mt-6">
+            <div className="mt-6 flex justify-center">
               <Pagination
                 currentPage={meta.current_page}
                 lastPage={meta.last_page}
@@ -571,5 +527,55 @@ export function BrowseLayout({
         onViewCart={handleViewCart}
       />
     </div>
+  );
+}
+
+function FilterSection({
+  title,
+  aside,
+  children,
+}: {
+  title: string;
+  aside?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="border-b border-border px-4 py-4 last:border-b-0">
+      <div className="mb-2.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        <span>{title}</span>
+        {aside && <span className="font-normal normal-case tracking-normal">{aside}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function FilterOption({
+  checked,
+  onCheckedChange,
+  label,
+}: {
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  label: string;
+}) {
+  return (
+    <Label className="cursor-pointer font-normal text-foreground">
+      <Checkbox checked={checked} onCheckedChange={(value) => onCheckedChange(value === true)} />
+      <span className="truncate">{label}</span>
+    </Label>
+  );
+}
+
+function FilterChip({ onRemove, children }: { onRemove: () => void; children: ReactNode }) {
+  return (
+    <Badge
+      variant="outline"
+      render={<button type="button" onClick={onRemove} />}
+      className="h-6 cursor-pointer gap-1 bg-card px-2.5 text-[11px] hover:bg-muted"
+    >
+      {children}
+      <X data-icon="inline-end" />
+    </Badge>
   );
 }
