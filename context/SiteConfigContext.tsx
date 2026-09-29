@@ -33,7 +33,26 @@ export interface SiteSettings {
   footer_tagline?: string;
   footer_assistance_title?: string;
   business_hours_title?: string;
-  nav_groups?: { label: string; keywords: string[]; url?: string }[];
+  view_all_label?: string;
+  all_brands_label?: string;
+  shop_by_category_title?: string;
+  featured_brands_title?: string;
+  new_arrivals_title?: string;
+  sold_out_label?: string;
+  login_to_buy_label?: string;
+  wholesale_label?: string;
+  price_unavailable_label?: string;
+  currency_code?: string;
+  nav_groups?: {
+    label: string;
+    keywords?: string[];
+    url?: string;
+    is_active?: boolean;
+    children?: { label: string; url: string; is_active?: boolean }[];
+    type?: "sections";
+    sections?: { title: string; items: { label: string; href: string; img?: string }[] }[];
+    promo?: { tag?: string; img?: string; name?: string; href?: string };
+  }[];
   footer_columns?: { title: string; links: { label: string; url: string }[] }[];
   business_hours?: string[];
 }

@@ -14,21 +14,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-function formatPrice(value: number) {
+function formatPrice(value: number, currency: string) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency,
     minimumFractionDigits: 2,
   }).format(value);
 }
 
-function SectionHeader({ title, href, linkLabel = "View all" }: { title: string; href?: string; linkLabel?: string }) {
+function SectionHeader({ title, href, linkLabel }: { title: string; href?: string; linkLabel?: string }) {
+  const { site } = useSiteConfig();
+  const label = linkLabel ?? site.view_all_label ?? "View all";
   return (
     <div className="mb-4 flex items-end justify-between gap-4">
       <h2 className="font-heading text-2xl font-semibold tracking-tight text-foreground md:text-3xl">{title}</h2>
       {href && (
         <Link href={href} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-muted-foreground no-underline")}>
-          {linkLabel} <ArrowRight data-icon="inline-end" />
+          {label} <ArrowRight data-icon="inline-end" />
         </Link>
       )}
     </div>
@@ -187,18 +189,13 @@ function HeroRow({ main, side }: { main: HomepageSection; side?: HomepageSection
 
 function BannerGrid({ items }: { items: HomepageItem[] }) {
   if (items.length === 0) return null;
-  const isWide = items.length <= 2;
+  const gridColsClass =
+    items.length <= 2 ? "lg:grid-cols-[2fr_1fr]" : items.length === 3 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
   return (
-    <div className={cn("grid gap-4", isWide ? "lg:grid-cols-[2fr_1fr]" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4")}>
+    <div className={cn("grid gap-4", gridColsClass)}>
       {items.map((item) => (
         <MaybeLink key={item.id} href={item.link_url} label={item.alt_text || item.title || undefined} className="group block overflow-hidden rounded-xl bg-muted">
-          <ResponsiveImage
-            item={item}
-            className={cn(
-              "block transition-transform duration-300 group-hover:scale-[1.02]",
-              isWide ? "h-auto w-full" : "aspect-[394/454] h-full w-full object-cover",
-            )}
-          />
+          <ResponsiveImage item={item} className="block h-auto w-full transition-transform duration-300 group-hover:scale-[1.02]" />
         </MaybeLink>
       ))}
     </div>
@@ -301,12 +298,18 @@ function CategoryGrid({ section }: { section: HomepageSection }) {
 
 function HomeProductCard({ product, isAuthenticated }: { product: Product; isAuthenticated: boolean }) {
   const { addItem } = useCart();
+  const { site } = useSiteConfig();
   const image = product.image ?? product.images?.find((img) => img.is_primary)?.url;
   const href = `/product/${product.id}`;
   const soldOut = !product.in_stock;
   const price = product.current_price ?? product.sale_price ?? product.regular_price ?? null;
   const regularPrice = product.on_sale && product.regular_price && product.sale_price ? product.regular_price : null;
   const canAdd = Boolean(product.type === "simple" && !soldOut && price !== null && isAuthenticated);
+  const currency = site.currency_code || "USD";
+  const soldOutLabel = site.sold_out_label || "Sold out";
+  const loginToBuyLabel = site.login_to_buy_label || "Login to buy";
+  const wholesaleLabel = site.wholesale_label || "Wholesale";
+  const priceUnavailableLabel = site.price_unavailable_label || "Price N/A";
 
   function handleAddToCart() {
     if (price === null) return;
@@ -325,13 +328,13 @@ function HomeProductCard({ product, isAuthenticated }: { product: Product; isAut
         )}
         {soldOut && (
           <div className="absolute left-2 top-2">
-            <Badge variant="destructive" className="bg-background/90 font-mono">Sold out</Badge>
+            <Badge variant="destructive" className="bg-background/90 font-mono">{soldOutLabel}</Badge>
           </div>
         )}
       </Link>
 
       <div className="flex flex-1 flex-col p-3">
-        <span className="line-clamp-1 font-mono text-[11px] uppercase tracking-wide text-muted-foreground">{product.category?.name ?? "Wholesale"}</span>
+        <span className="line-clamp-1 font-mono text-[11px] uppercase tracking-wide text-muted-foreground">{product.category?.name ?? wholesaleLabel}</span>
         <Link href={href} className="mt-1 no-underline">
           <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-5 text-foreground transition-colors group-hover:text-primary">{product.name}</h3>
         </Link>
@@ -339,14 +342,14 @@ function HomeProductCard({ product, isAuthenticated }: { product: Product; isAut
         <div className="mt-auto flex items-end justify-between gap-2 pt-3">
           {!isAuthenticated ? (
             <Link href="/login" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full no-underline")}>
-              Login to buy
+              {loginToBuyLabel}
             </Link>
           ) : (
             <>
               <span className="flex flex-col">
-                <span className="font-mono text-[10px] font-medium uppercase tracking-wide text-primary">Wholesale</span>
-                <span className="font-mono text-lg font-semibold leading-tight text-foreground">{price !== null ? formatPrice(price) : "Price N/A"}</span>
-                {regularPrice && <span className="font-mono text-[11px] leading-tight text-muted-foreground line-through">{formatPrice(regularPrice)}</span>}
+                <span className="font-mono text-[10px] font-medium uppercase tracking-wide text-primary">{wholesaleLabel}</span>
+                <span className="font-mono text-lg font-semibold leading-tight text-foreground">{price !== null ? formatPrice(price, currency) : priceUnavailableLabel}</span>
+                {regularPrice && <span className="font-mono text-[11px] leading-tight text-muted-foreground line-through">{formatPrice(regularPrice, currency)}</span>}
               </span>
               {canAdd ? (
                 <Button type="button" size="icon-lg" onClick={handleAddToCart} aria-label={`Add ${product.name} to cart`} title="Add to cart">
@@ -386,10 +389,11 @@ function ProductGridSection({ section, products }: { section: HomepageSection; p
 
 function LiveBrands({ title }: { title: string }) {
   const { data: brands } = useBrands();
+  const { site } = useSiteConfig();
   if (!brands?.length) return null;
   return (
     <Section>
-      <SectionHeader title={title} href="/brands" linkLabel="All brands" />
+      <SectionHeader title={title} href="/brands" linkLabel={site.all_brands_label || "All brands"} />
       <div className="grid grid-cols-2 gap-6 rounded-xl bg-card px-6 py-8 ring-1 ring-foreground/10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
         {brands.slice(0, 7).map((brand) => (
           <Link key={brand.id} href={`/brand/${brand.id}`} className="group flex min-w-0 flex-col items-center gap-3 text-center no-underline">
@@ -411,11 +415,12 @@ function LiveBrands({ title }: { title: string }) {
 }
 
 function BrandShowcase({ section }: { section: HomepageSection }) {
+  const { site } = useSiteConfig();
   const logos = section.items.filter((item) => item.kind === "brand" && (item.video_url || item.desktop_image_url)).slice(0, 7);
   if (logos.length === 0) return <LiveBrands title={section.title} />;
   return (
     <Section>
-      <ManagedHeader section={section} href="/brands" linkLabel="All brands" />
+      <ManagedHeader section={section} href="/brands" linkLabel={site.all_brands_label || "All brands"} />
       <div className="flex flex-wrap justify-center gap-6 rounded-xl bg-card px-6 py-8">
         {logos.map((logo) => (
           <MaybeLink
@@ -506,14 +511,15 @@ function ManagedSection({ section, products }: { section: HomepageSection; produ
 /** Shown when the homepage CMS cannot be reached, so the storefront still lists live catalogue data. */
 function LiveFallback() {
   const { isAuthenticated } = useAuth();
+  const { site } = useSiteConfig();
   const { data: newest } = useProducts({ sort: "newest", per_page: 14 });
   return (
     <>
-      <LiveCategories title="Shop by category" />
-      <LiveBrands title="Featured brands" />
+      <LiveCategories title={site.shop_by_category_title || "Shop by category"} />
+      <LiveBrands title={site.featured_brands_title || "Featured brands"} />
       {newest?.data?.length ? (
         <Section>
-          <SectionHeader title="New arrivals" href="/new" />
+          <SectionHeader title={site.new_arrivals_title || "New arrivals"} href="/new" />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7">
             {newest.data.map((product) => (
               <HomeProductCard key={product.id} product={product} isAuthenticated={isAuthenticated} />
