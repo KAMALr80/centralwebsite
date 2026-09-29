@@ -11,24 +11,22 @@ interface PageHeaderProps {
 
 export function PageHeader({ crumbs, title, accent, meta, actions }: PageHeaderProps) {
   return (
-    <div className="px-4 sm:px-6 md:px-8 py-4 md:py-5 pb-4 border-b border-brand-line bg-brand-white">
-      <div className="flex items-baseline justify-between gap-4 flex-wrap max-w-7xl mx-auto">
-        <div className="flex items-baseline gap-3 md:gap-4 flex-wrap">
+    <div className="border-b border-border bg-card px-4 pb-5 pt-6 sm:px-8">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-2">
           {crumbs && crumbs.length > 0 && <Breadcrumb items={crumbs} />}
-          <h1 className="font-serif text-[26px] sm:text-[30px] md:text-[36px] leading-none text-brand-ink font-normal tracking-tight m-0">
-            {title}
-            {accent && (
-              <em className="text-brand-blue not-italic"> {accent}</em>
+          <div className="flex flex-wrap items-baseline gap-3">
+            <h1 className="m-0 font-heading text-3xl font-semibold leading-none tracking-tight text-foreground">
+              {title}
+              {accent && <span className="text-primary"> {accent}</span>}
+            </h1>
+            {meta && (
+              <span className="text-xs text-muted-foreground">{meta}</span>
             )}
-          </h1>
-          {meta && (
-            <span className="font-mono text-[11px] text-brand-muted tracking-[0.04em]">
-              {meta}
-            </span>
-          )}
+          </div>
         </div>
         {actions && (
-          <div className="flex items-center gap-1.5 font-mono text-[11px]">
+          <div className="flex items-center gap-1.5 text-xs">
             {actions}
           </div>
         )}

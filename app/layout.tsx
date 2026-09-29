@@ -1,30 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Providers } from "./providers";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const geistSans = Geist({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-const geistMono = Geist_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-});
+const interHeading = Inter({ subsets: ["latin"], variable: "--font-heading" });
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal", "italic"],
-});
+const interMono = Inter({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: process.env.NEXT_PUBLIC_COMPANY_NAME ?? "Forge & Co.",
-  description: "B2B wholesale ecommerce for indie retail buyers.",
+  title: "Disposable Vape Distributor in White Plains - Central Smoke Distro",
+  description:
+    "Central Smoke Distro is a wholesale distributor of disposable vapes and smoke shop essentials in White Plains.",
 };
 
 export default function RootLayout({
@@ -35,10 +24,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-theme={process.env.NEXT_PUBLIC_THEME ?? "forge"}
-      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased`}
+      className={cn("h-full", "antialiased", interMono.variable, "font-sans", inter.variable, interHeading.variable)}
     >
-      <body className="min-h-full flex flex-col bg-brand-bg text-brand-ink">
+      <body className="min-h-full flex flex-col bg-background text-foreground">
         <Providers>{children}</Providers>
       </body>
     </html>

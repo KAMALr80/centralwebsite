@@ -1,15 +1,23 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 import { useState } from "react";
 import { useRequireAuth } from "@/components/auth/withAuth";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth, type User } from "@/context/AuthContext";
 import { PageHeader } from "@/components/shared/PageHeader";
 import api from "@/lib/axios";
 
-export default function EditProfilePage() {
-  const { isLoading } = useRequireAuth();
-  const { user, updateUser } = useAuth();
-
+function EditProfileForm({
+  user,
+  updateUser,
+}: {
+  user: User;
+  updateUser: (patch: Partial<User>) => void;
+}) {
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
@@ -18,8 +26,6 @@ export default function EditProfilePage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (isLoading) return null;
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -27,91 +33,102 @@ export default function EditProfilePage() {
     setSuccess(false);
     try {
       const res = await api.patch<{ user: { name: string; email: string; phone?: string; address?: string } }>(
-        `/users/${user!.id}`,
+        `/users/${user.id}`,
         { name, email, phone: phone || undefined, address: address || undefined }
       );
       updateUser({ name: res.data.user.name, email: res.data.user.email, phone: res.data.user.phone, address: res.data.user.address });
       setSuccess(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg =
-        err?.response?.data?.message ?? "Failed to update profile. Please try again.";
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        "Failed to update profile. Please try again.";
       setError(msg);
     } finally {
       setSaving(false);
     }
   }
 
-  const INPUT =
-    "w-full bg-brand-white border border-brand-line rounded-[var(--brand-radius)] px-3 py-2 font-mono text-[13px] text-brand-ink placeholder:text-brand-muted focus:outline-none focus:border-brand-blue transition-colors";
-  const LABEL = "block font-mono text-[11px] tracking-[0.06em] uppercase text-brand-muted mb-1";
+  const INPUT = "h-9 md:text-sm";
+  const LABEL = "mb-1.5 text-xs font-medium text-foreground";
 
   return (
-    <div className="bg-brand-bg min-h-screen pb-20">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div>
+        <Label className={LABEL}>Full Name</Label>
+        <Input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className={INPUT}
+          required
+          maxLength={255}
+        />
+      </div>
+
+      <div>
+        <Label className={LABEL}>Email Address</Label>
+        <Input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className={INPUT}
+          required
+        />
+      </div>
+
+      <div>
+        <Label className={LABEL}>Phone Number</Label>
+        <Input
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          className={INPUT}
+          maxLength={20}
+          placeholder="Optional"
+        />
+      </div>
+
+      <div>
+        <Label className={LABEL}>Address</Label>
+        <Textarea
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="resize-none md:text-sm"
+          rows={3}
+          maxLength={500}
+          placeholder="Optional"
+        />
+      </div>
+
+      {error && (
+        <p className="rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p>
+      )}
+      {success && (
+        <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-700">Profile updated successfully.</p>
+      )}
+
+      <Button type="submit" size="lg" disabled={saving} className="h-9 w-full text-sm">
+        {saving ? "Saving…" : "Save Changes"}
+      </Button>
+    </form>
+  );
+}
+
+export default function EditProfilePage() {
+  const { isLoading } = useRequireAuth();
+  const { user, updateUser } = useAuth();
+
+  if (isLoading || !user) return null;
+
+  return (
+    <div className="bg-background min-h-screen pb-20">
       <PageHeader crumbs={[{ label: "Account", href: "/account/profile" }, { label: "Edit Profile" }]} title="Edit Profile" />
-      <div className="px-4 sm:px-6 md:px-8 py-6 md:py-8 max-w-lg mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className={LABEL}>Full Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={INPUT}
-              required
-              maxLength={255}
-            />
-          </div>
-
-          <div>
-            <label className={LABEL}>Email Address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={INPUT}
-              required
-            />
-          </div>
-
-          <div>
-            <label className={LABEL}>Phone Number</label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className={INPUT}
-              maxLength={20}
-              placeholder="Optional"
-            />
-          </div>
-
-          <div>
-            <label className={LABEL}>Address</label>
-            <textarea
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className={`${INPUT} resize-none`}
-              rows={3}
-              maxLength={500}
-              placeholder="Optional"
-            />
-          </div>
-
-          {error && (
-            <p className="font-mono text-[12px] text-[#B83434]">{error}</p>
-          )}
-          {success && (
-            <p className="font-mono text-[12px] text-[#065F46]">Profile updated successfully.</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full bg-brand-navy text-white font-mono text-[11px] tracking-[0.08em] uppercase py-2.5 px-4 hover:bg-brand-blue transition-colors disabled:opacity-60 cursor-pointer rounded-[var(--brand-radius)]"
-          >
-            {saving ? "Saving…" : "Save Changes"}
-          </button>
-        </form>
+      <div className="mx-auto max-w-lg px-4 py-8 sm:px-8">
+        <Card>
+          <CardContent>
+            <EditProfileForm key={user.id} user={user} updateUser={updateUser} />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

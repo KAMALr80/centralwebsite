@@ -1,7 +1,13 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Pagination as PaginationRoot,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+} from "@/components/ui/pagination";
 
 interface PaginationProps {
   currentPage: number;
@@ -9,66 +15,71 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
+function buildPages(currentPage: number, lastPage: number): (number | "...")[] {
+  if (lastPage <= 7) {
+    return Array.from({ length: lastPage }, (_, i) => i + 1);
+  }
+  const pages: (number | "...")[] = [1];
+  if (currentPage > 3) pages.push("...");
+  for (let p = Math.max(2, currentPage - 1); p <= Math.min(lastPage - 1, currentPage + 1); p++) {
+    pages.push(p);
+  }
+  if (currentPage < lastPage - 2) pages.push("...");
+  pages.push(lastPage);
+  return pages;
+}
+
 export function Pagination({ currentPage, lastPage, onPageChange }: PaginationProps) {
   if (lastPage <= 1) return null;
 
-  // Build page number array with ellipsis markers
-  function buildPages(): (number | "...")[] {
-    if (lastPage <= 7) {
-      return Array.from({ length: lastPage }, (_, i) => i + 1);
-    }
-    const pages: (number | "...")[] = [1];
-    if (currentPage > 3) pages.push("...");
-    for (let p = Math.max(2, currentPage - 1); p <= Math.min(lastPage - 1, currentPage + 1); p++) {
-      pages.push(p);
-    }
-    if (currentPage < lastPage - 2) pages.push("...");
-    pages.push(lastPage);
-    return pages;
-  }
-
-  const pages = buildPages();
+  const pages = buildPages(currentPage, lastPage);
 
   return (
-    <div className="flex items-center gap-1 font-mono text-[12px]">
-      <button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="w-8 h-8 flex items-center justify-center border border-brand-line rounded-[var(--brand-radius)] text-brand-muted hover:border-brand-ink hover:text-brand-ink disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        aria-label="Previous page"
-      >
-        <ChevronLeft size={14} />
-      </button>
-
-      {pages.map((p, i) =>
-        p === "..." ? (
-          <span key={`ellipsis-${i}`} className="w-8 h-8 flex items-center justify-center text-brand-muted">
-            …
-          </span>
-        ) : (
-          <button
-            key={p}
-            onClick={() => onPageChange(p)}
-            className={cn(
-              "w-8 h-8 flex items-center justify-center border rounded-[var(--brand-radius)] transition-colors",
-              p === currentPage
-                ? "bg-brand-ink text-brand-white border-brand-ink"
-                : "border-brand-line text-brand-muted hover:border-brand-ink hover:text-brand-ink"
-            )}
+    <PaginationRoot className="mx-0 w-auto justify-start">
+      <PaginationContent className="gap-1">
+        <PaginationItem>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            aria-label="Previous page"
           >
-            {p}
-          </button>
-        )
-      )}
+            <ChevronLeft />
+          </Button>
+        </PaginationItem>
 
-      <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === lastPage}
-        className="w-8 h-8 flex items-center justify-center border border-brand-line rounded-[var(--brand-radius)] text-brand-muted hover:border-brand-ink hover:text-brand-ink disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        aria-label="Next page"
-      >
-        <ChevronRight size={14} />
-      </button>
-    </div>
+        {pages.map((p, i) =>
+          p === "..." ? (
+            <PaginationItem key={`ellipsis-${i}`}>
+              <PaginationEllipsis />
+            </PaginationItem>
+          ) : (
+            <PaginationItem key={p}>
+              <Button
+                variant={p === currentPage ? "outline" : "ghost"}
+                size="icon"
+                onClick={() => onPageChange(p)}
+                aria-current={p === currentPage ? "page" : undefined}
+              >
+                {p}
+              </Button>
+            </PaginationItem>
+          )
+        )}
+
+        <PaginationItem>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === lastPage}
+            aria-label="Next page"
+          >
+            <ChevronRight />
+          </Button>
+        </PaginationItem>
+      </PaginationContent>
+    </PaginationRoot>
   );
 }

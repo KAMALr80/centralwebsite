@@ -3,10 +3,16 @@
 import { use, useState, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { useBrand } from "@/hooks/useBrands";
 import { useProducts } from "@/hooks/useProducts";
 import { BrowseLayout } from "@/components/browse/BrowseLayout";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -16,15 +22,8 @@ type Tab = "catalog" | "new" | "sale";
 
 function Placeholder({ label }: { label: string }) {
   return (
-    <div
-      className="w-full h-full flex items-center justify-center"
-      style={{
-        background: "repeating-linear-gradient(135deg, #E5DFD0 0 14px, #D9D3C5 14px 28px)",
-      }}
-    >
-      <span className="font-mono text-[10px] tracking-[0.08em] uppercase px-2 py-1 text-brand-muted bg-brand-bg/90">
-        {label}
-      </span>
+    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-chart-4 via-chart-3 to-chart-1">
+      <Badge variant="secondary" className="bg-background/80">{label}</Badge>
     </div>
   );
 }
@@ -44,9 +43,7 @@ function BrandHero({ id }: { id: string }) {
 
   if (brandLoading) {
     return (
-      <div className="animate-pulse">
-        <div className="h-[280px] bg-brand-bg-alt" />
-      </div>
+      <Skeleton className="h-[280px] rounded-none" />
     );
   }
 
@@ -55,7 +52,7 @@ function BrandHero({ id }: { id: string }) {
   return (
     <>
       {/* Breadcrumb */}
-      <div className="px-4 sm:px-6 md:px-8 py-3.5 border-b border-brand-line bg-brand-white">
+      <div className="border-b border-border bg-card px-4 py-3.5 sm:px-8">
         <Breadcrumb
           items={[
             { label: "Brands", href: "/brands" },
@@ -64,42 +61,34 @@ function BrandHero({ id }: { id: string }) {
         />
       </div>
 
-      {/* Hero — stacks on mobile, two-column on md+ */}
-      <div className="grid md:grid-cols-[1.2fr_1fr] border-b border-brand-line">
+      {/* Hero — two-column */}
+      <div className="grid grid-cols-1 border-b border-border lg:grid-cols-[1.2fr_1fr]">
         {/* Left: image with gradient overlay */}
-        <div className="relative min-h-[220px] md:min-h-[280px] overflow-hidden">
+        <div className="relative min-h-[280px] overflow-hidden">
           {brand.image ? (
             <Image src={brand.image} alt={brand.name} fill className="object-cover" />
           ) : (
             <Placeholder label={`${brand.name} · studio`} />
           )}
           {/* Gradient overlay */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(180deg, rgba(11,31,58,0.0) 40%, rgba(11,31,58,0.75) 100%)",
-            }}
-          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent from-40% to-foreground/80" />
           {/* Brand name overlay */}
-          <div className="absolute bottom-4 md:bottom-6 left-4 md:left-8 right-4 md:right-8 text-white">
-            <div className="font-mono text-[10.5px] tracking-[0.12em] uppercase text-brand-orange mb-2">
+          <div className="absolute bottom-6 left-8 right-8 text-white">
+            <div className="font-mono text-[10.5px] tracking-[0.12em] uppercase text-background/80 mb-2">
               {brand.location ?? "USA"}
               {brand.founded_year ? ` · EST. ${brand.founded_year}` : ""}
             </div>
-            <h1 className="font-serif text-[32px] sm:text-[42px] md:text-[52px] leading-[0.95] font-normal tracking-tight m-0">
+            <h1 className="m-0 font-heading text-3xl font-semibold leading-[0.95] tracking-tight sm:text-5xl">
               {brand.name}
             </h1>
           </div>
         </div>
 
         {/* Right: buyer fact sheet */}
-        <div className="bg-brand-white px-4 sm:px-6 md:px-7 py-4 md:py-6">
-          <div className="flex items-center justify-between pb-3 border-b border-brand-ink mb-1">
-            <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-brand-ink">
-              Buyer fact sheet
-            </span>
-            <span className="font-mono text-[10px] text-brand-muted">
+        <div className="bg-card px-7 py-6">
+          <div className="mb-1 flex items-center justify-between border-b border-border pb-3">
+            <span className="text-sm font-semibold text-foreground">Buyer fact sheet</span>
+            <span className="font-mono text-[10px] text-muted-foreground">
               {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase()}
             </span>
           </div>
@@ -114,11 +103,11 @@ function BrandHero({ id }: { id: string }) {
               },
               { l: "Terms", v: "Net-60" },
             ].map((s) => (
-              <div key={s.l} className="py-3 border-b border-brand-line">
-                <div className="font-mono text-[10px] tracking-[0.06em] uppercase text-brand-muted mb-0.5">
+              <div key={s.l} className="py-3 border-b border-border">
+                <div className="font-mono text-[10px] tracking-[0.06em] uppercase text-muted-foreground mb-0.5">
                   {s.l}
                 </div>
-                <div className="font-mono text-[15px] font-medium text-brand-ink">
+                <div className="font-mono text-lg font-semibold text-foreground">
                   {s.v}
                 </div>
               </div>
@@ -126,19 +115,16 @@ function BrandHero({ id }: { id: string }) {
           </div>
 
           {brand.description && (
-            <blockquote className="mt-4 pl-3 border-l-2 border-brand-orange">
-              <p className="text-[13px] text-brand-muted leading-relaxed italic">
+            <blockquote className="mt-4 pl-3 border-l-2 border-primary">
+              <p className="text-[13px] text-muted-foreground leading-relaxed italic">
                 {brand.description}
               </p>
             </blockquote>
           )}
 
           <div className="mt-5 flex items-center gap-4">
-            <Link
-              href={`/brand/${id}#products`}
-              className="font-mono text-[11px] tracking-[0.06em] uppercase text-brand-blue hover:text-brand-blue-deep transition-colors"
-            >
-              → Shop all products
+            <Link href={`/brand/${id}#products`} className={cn(buttonVariants({ size: "lg" }), "h-9 px-4 no-underline")}>
+              Shop all products <ArrowRight data-icon="inline-end" />
             </Link>
           </div>
         </div>
@@ -159,22 +145,16 @@ function BrandProducts({ id, brandName }: { id: string; brandName: string }) {
   return (
     <div id="products">
       {/* Tab bar */}
-      <div className="px-4 sm:px-6 md:px-8 pt-0 border-b border-brand-line bg-brand-white flex items-center gap-0">
-        {(Object.entries(TAB_CONFIG) as [Tab, (typeof TAB_CONFIG)[Tab]][]).map(
-          ([key, cfg]) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={`px-5 py-3.5 font-mono text-[11px] tracking-[0.08em] uppercase border-b-2 transition-colors ${
-                tab === key
-                  ? "border-brand-orange text-brand-ink"
-                  : "border-transparent text-brand-muted hover:text-brand-ink"
-              }`}
-            >
-              {cfg.label}
-            </button>
-          )
-        )}
+      <div className="border-b border-border bg-card px-4 pt-2 sm:px-8">
+        <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
+          <TabsList variant="line">
+            {(Object.entries(TAB_CONFIG) as [Tab, (typeof TAB_CONFIG)[Tab]][]).map(([key, cfg]) => (
+              <TabsTrigger key={key} value={key} className="px-4">
+                {cfg.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* BrowseLayout handles filters/table/pagination */}
@@ -194,12 +174,24 @@ function BrandProducts({ id, brandName }: { id: string; brandName: string }) {
 }
 
 function BrandPageInner({ id }: { id: string }) {
-  const { data: brand } = useBrand(id);
+  const { data: brand, isLoading, isError, refetch } = useBrand(id);
+  const numericId = Number(id);
+
+  if (isLoading) return <Skeleton className="h-60 rounded-none" />;
+
+  if (!Number.isInteger(numericId) || numericId <= 0 || isError || !brand) {
+    return (
+      <div className="flex h-60 flex-col items-center justify-center gap-4 text-center">
+        <p className="text-sm text-muted-foreground">Brand not found.</p>
+        {isError && <Button type="button" onClick={() => refetch()}>Try again</Button>}
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-brand-bg min-h-screen">
+    <div className="bg-background min-h-screen">
       <BrandHero id={id} />
-      <BrandProducts id={id} brandName={brand?.name ?? ""} />
+      <BrandProducts id={id} brandName={brand.name} />
     </div>
   );
 }

@@ -1,4 +1,12 @@
 "use client";
+import { Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { useState } from "react";
 import { useRequireAuth } from "@/components/auth/withAuth";
@@ -22,7 +30,7 @@ const EMPTY_FORM: NewAddress = {
   city: "",
   state: "",
   postcode: "",
-  country: "AU",
+  country: "US",
   phone: "",
   is_default: false,
 };
@@ -42,98 +50,87 @@ function AddressForm({
   const set = (field: keyof NewAddress) => (e: { target: { value: string } }) =>
     setForm((f: NewAddress) => ({ ...f, [field]: e.target.value }));
 
-  const INPUT =
-    "w-full bg-brand-white border border-brand-line rounded-[var(--brand-radius)] px-3 py-2 font-mono text-[13px] text-brand-ink placeholder:text-brand-muted focus:outline-none focus:border-brand-blue transition-colors";
-  const LABEL = "block font-mono text-[11px] tracking-[0.06em] uppercase text-brand-muted mb-1";
+  const INPUT = "h-9 md:text-sm";
+  const LABEL = "mb-1.5 text-xs font-medium text-foreground";
 
   return (
     <form
       onSubmit={(e) => { e.preventDefault(); onSave(form); }}
-      className="space-y-4 bg-brand-bg-alt border border-brand-line rounded-[var(--brand-radius)] p-5"
+      className="space-y-4 rounded-lg bg-card p-5 ring-1 ring-foreground/10"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className={LABEL}>First Name *</label>
-          <input type="text" value={form.first_name} onChange={set("first_name")} className={INPUT} required maxLength={100} />
+          <Label className={LABEL}>First Name *</Label>
+          <Input type="text" value={form.first_name} onChange={set("first_name")} className={INPUT} required maxLength={100} />
         </div>
         <div>
-          <label className={LABEL}>Last Name *</label>
-          <input type="text" value={form.last_name} onChange={set("last_name")} className={INPUT} required maxLength={100} />
-        </div>
-      </div>
-
-      <div>
-        <label className={LABEL}>Label (e.g. Home, Office)</label>
-        <input type="text" value={form.label ?? ""} onChange={set("label")} className={INPUT} maxLength={50} placeholder="Optional" />
-      </div>
-
-      <div>
-        <label className={LABEL}>Company</label>
-        <input type="text" value={form.company ?? ""} onChange={set("company")} className={INPUT} maxLength={255} placeholder="Optional" />
-      </div>
-
-      <div>
-        <label className={LABEL}>Address Line 1 *</label>
-        <input type="text" value={form.address_1} onChange={set("address_1")} className={INPUT} required maxLength={255} />
-      </div>
-
-      <div>
-        <label className={LABEL}>Address Line 2</label>
-        <input type="text" value={form.address_2 ?? ""} onChange={set("address_2")} className={INPUT} maxLength={255} placeholder="Optional" />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className={LABEL}>City *</label>
-          <input type="text" value={form.city} onChange={set("city")} className={INPUT} required maxLength={100} />
-        </div>
-        <div>
-          <label className={LABEL}>State / Region</label>
-          <input type="text" value={form.state ?? ""} onChange={set("state")} className={INPUT} maxLength={100} placeholder="Optional" />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className={LABEL}>Postcode *</label>
-          <input type="text" value={form.postcode} onChange={set("postcode")} className={INPUT} required maxLength={20} />
-        </div>
-        <div>
-          <label className={LABEL}>Country *</label>
-          <input type="text" value={form.country} onChange={set("country")} className={INPUT} required maxLength={2} placeholder="AU" />
+          <Label className={LABEL}>Last Name *</Label>
+          <Input type="text" value={form.last_name} onChange={set("last_name")} className={INPUT} required maxLength={100} />
         </div>
       </div>
 
       <div>
-        <label className={LABEL}>Phone</label>
-        <input type="tel" value={form.phone ?? ""} onChange={set("phone")} className={INPUT} maxLength={20} placeholder="Optional" />
+        <Label className={LABEL}>Label (e.g. Home, Office)</Label>
+        <Input type="text" value={form.label ?? ""} onChange={set("label")} className={INPUT} maxLength={50} placeholder="Optional" />
       </div>
 
-      <label className="flex items-center gap-2 cursor-pointer">
-        <input
-          type="checkbox"
+      <div>
+        <Label className={LABEL}>Company</Label>
+        <Input type="text" value={form.company ?? ""} onChange={set("company")} className={INPUT} maxLength={255} placeholder="Optional" />
+      </div>
+
+      <div>
+        <Label className={LABEL}>Address Line 1 *</Label>
+        <Input type="text" value={form.address_1} onChange={set("address_1")} className={INPUT} required maxLength={255} />
+      </div>
+
+      <div>
+        <Label className={LABEL}>Address Line 2</Label>
+        <Input type="text" value={form.address_2 ?? ""} onChange={set("address_2")} className={INPUT} maxLength={255} placeholder="Optional" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <Label className={LABEL}>City *</Label>
+          <Input type="text" value={form.city} onChange={set("city")} className={INPUT} required maxLength={100} />
+        </div>
+        <div>
+          <Label className={LABEL}>State / Region</Label>
+          <Input type="text" value={form.state ?? ""} onChange={set("state")} className={INPUT} maxLength={100} placeholder="Optional" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <Label className={LABEL}>Postcode *</Label>
+          <Input type="text" value={form.postcode} onChange={set("postcode")} className={INPUT} required maxLength={20} />
+        </div>
+        <div>
+          <Label className={LABEL}>Country *</Label>
+          <Input type="text" value={form.country} onChange={set("country")} className={INPUT} required maxLength={2} placeholder="AU" />
+        </div>
+      </div>
+
+      <div>
+        <Label className={LABEL}>Phone</Label>
+        <Input type="tel" value={form.phone ?? ""} onChange={set("phone")} className={INPUT} maxLength={20} placeholder="Optional" />
+      </div>
+
+      <Label className="cursor-pointer font-normal text-foreground">
+        <Checkbox
           checked={!!form.is_default}
-          onChange={(e) => setForm((f) => ({ ...f, is_default: e.target.checked }))}
-          className="accent-brand-blue"
+          onCheckedChange={(checked) => setForm((f) => ({ ...f, is_default: checked === true }))}
         />
-        <span className="font-mono text-[11px] tracking-[0.04em] text-brand-ink">Set as default address</span>
-      </label>
+        Set as default address
+      </Label>
 
       <div className="flex gap-3">
-        <button
-          type="submit"
-          disabled={saving}
-          className="bg-brand-navy text-white font-mono text-[11px] tracking-[0.08em] uppercase py-2 px-5 hover:bg-brand-blue transition-colors disabled:opacity-60 cursor-pointer rounded-[var(--brand-radius)]"
-        >
+        <Button type="submit" disabled={saving}>
           {saving ? "Saving…" : "Save Address"}
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="font-mono text-[11px] tracking-[0.08em] uppercase py-2 px-5 border border-brand-line text-brand-muted hover:text-brand-ink hover:border-brand-ink transition-colors cursor-pointer rounded-[var(--brand-radius)] bg-transparent"
-        >
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -153,62 +150,46 @@ function AddressCard({
   deleting: boolean;
 }) {
   return (
-    <div className={`border rounded-[var(--brand-radius)] p-4 bg-brand-white relative ${address.is_default ? "border-brand-blue" : "border-brand-line"}`}>
+    <div className={cn("relative rounded-lg bg-card p-4 ring-1", address.is_default ? "ring-2 ring-primary" : "ring-foreground/10")}>
       {address.is_default && (
-        <span className="absolute top-3 right-3 font-mono text-[9px] tracking-[0.08em] uppercase bg-brand-blue text-white px-2 py-0.5 rounded-[var(--brand-radius)]">
-          Default
-        </span>
+        <Badge className="absolute right-3 top-3 font-mono">Default</Badge>
       )}
       {address.label && (
-        <p className="font-mono text-[10px] tracking-[0.06em] uppercase text-brand-muted mb-1">{address.label}</p>
+        <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{address.label}</p>
       )}
-      <p className="font-mono text-[13px] text-brand-ink font-medium">
+      <p className="text-sm font-medium text-foreground">
         {address.first_name} {address.last_name}
       </p>
       {address.company && (
-        <p className="font-mono text-[12px] text-brand-muted">{address.company}</p>
+        <p className="text-xs text-muted-foreground">{address.company}</p>
       )}
-      <p className="font-mono text-[12px] text-brand-muted mt-1">
+      <p className="text-xs text-muted-foreground mt-1">
         {address.address_1}
         {address.address_2 ? `, ${address.address_2}` : ""}
       </p>
-      <p className="font-mono text-[12px] text-brand-muted">
+      <p className="text-xs text-muted-foreground">
         {address.city}{address.state ? `, ${address.state}` : ""} {address.postcode} {address.country}
       </p>
       {address.phone && (
-        <p className="font-mono text-[12px] text-brand-muted mt-0.5">{address.phone}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{address.phone}</p>
       )}
 
-      <div className="flex items-center gap-4 mt-3">
-        <button
-          onClick={onEdit}
-          className="font-mono text-[11px] tracking-[0.04em] text-brand-blue hover:text-brand-blue-deep transition-colors cursor-pointer bg-transparent border-none p-0"
-        >
-          Edit
-        </button>
+      <div className="mt-3 flex items-center gap-1 -ml-2">
+        <Button variant="ghost" size="sm" onClick={onEdit}>Edit</Button>
         {!address.is_default && (
-          <button
-            onClick={onSetDefault}
-            className="font-mono text-[11px] tracking-[0.04em] text-brand-muted hover:text-brand-ink transition-colors cursor-pointer bg-transparent border-none p-0"
-          >
-            Set as default
-          </button>
+          <Button variant="ghost" size="sm" onClick={onSetDefault}>Set as default</Button>
         )}
-        <button
-          onClick={onDelete}
-          disabled={deleting}
-          className="font-mono text-[11px] tracking-[0.04em] text-[#B83434] hover:text-[#8B2020] transition-colors cursor-pointer bg-transparent border-none p-0 disabled:opacity-60"
-        >
+        <Button variant="ghost" size="sm" onClick={onDelete} disabled={deleting} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
           {deleting ? "Deleting…" : "Delete"}
-        </button>
+        </Button>
       </div>
     </div>
   );
 }
 
 export default function AddressesPage() {
-  const { isLoading: authLoading } = useRequireAuth();
-  const { data: addresses, isLoading } = useAddresses();
+  const { isLoading: authLoading, isAuthenticated } = useRequireAuth();
+  const { data: addresses, isLoading, isError, refetch } = useAddresses();
   const createAddress = useCreateAddress();
   const updateAddress = useUpdateAddress();
   const deleteAddress = useDeleteAddress();
@@ -217,14 +198,26 @@ export default function AddressesPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  if (authLoading || isLoading) {
+  if (authLoading || !isAuthenticated || isLoading) {
     return (
-      <div className="bg-brand-bg min-h-screen pb-20">
+      <div className="bg-background min-h-screen pb-20">
         <PageHeader crumbs={[{ label: "Account", href: "/account/profile" }, { label: "Addresses" }]} title="Manage Addresses" />
-        <div className="px-4 sm:px-6 md:px-8 py-6 md:py-8 max-w-2xl mx-auto space-y-4">
+        <div className="mx-auto max-w-2xl space-y-4 px-4 py-8 sm:px-8">
           {[1, 2].map((i) => (
-            <div key={i} className="h-36 bg-brand-bg-alt rounded animate-pulse" />
+            <Skeleton key={i} className="h-36 rounded-lg" />
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="bg-background min-h-screen pb-20">
+        <PageHeader crumbs={[{ label: "Account", href: "/account/profile" }, { label: "Addresses" }]} title="Manage Addresses" />
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-4 px-4 py-12 text-center sm:px-8">
+          <p className="text-xs text-muted-foreground">Addresses could not be loaded.</p>
+          <Button type="button" onClick={() => refetch()}>Try again</Button>
         </div>
       </div>
     );
@@ -239,6 +232,7 @@ export default function AddressesPage() {
   }
 
   function handleDelete(id: number) {
+    if (!window.confirm("Delete this address? This action cannot be undone.")) return;
     setDeletingId(id);
     deleteAddress.mutate(id, { onSettled: () => setDeletingId(null) });
   }
@@ -250,11 +244,11 @@ export default function AddressesPage() {
   const list = addresses ?? [];
 
   return (
-    <div className="bg-brand-bg min-h-screen pb-20">
+    <div className="bg-background min-h-screen pb-20">
       <PageHeader crumbs={[{ label: "Account", href: "/account/profile" }, { label: "Addresses" }]} title="Manage Addresses" />
-      <div className="px-4 sm:px-6 md:px-8 py-6 md:py-8 max-w-2xl mx-auto">
+      <div className="mx-auto max-w-2xl px-4 py-8 sm:px-8">
         {list.length === 0 && !showForm && (
-          <p className="font-mono text-[12px] text-brand-muted mb-6">No addresses saved yet.</p>
+          <p className="mb-6 text-sm text-muted-foreground">No addresses saved yet.</p>
         )}
 
         <div className="space-y-4 mb-6">
@@ -301,12 +295,9 @@ export default function AddressesPage() {
             saving={createAddress.isPending}
           />
         ) : (
-          <button
-            onClick={() => setShowForm(true)}
-            className="font-mono text-[11px] tracking-[0.08em] uppercase py-2 px-5 border border-brand-navy text-brand-navy hover:bg-brand-navy hover:text-white transition-colors cursor-pointer rounded-[var(--brand-radius)] bg-transparent"
-          >
-            + Add Address
-          </button>
+          <Button variant="outline" size="lg" className="h-9 px-4" onClick={() => setShowForm(true)}>
+            <Plus data-icon="inline-start" /> Add address
+          </Button>
         )}
       </div>
     </div>

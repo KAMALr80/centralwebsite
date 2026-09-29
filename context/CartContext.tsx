@@ -3,21 +3,22 @@
 import {
   createContext,
   useContext,
-  useEffect,
-  useState,
   useCallback,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
+import api from "@/lib/axios";
 
 export interface CartItem {
   product_id: number;
   name: string;
-  sku: string;
+  sku: string | null;
   image: string | null;
   price: number;
   quantity: number;
   parent_id?: number | null;
   parent_name?: string | null;
+  price_pending?: boolean;
 }
 
 interface CartContextValue {
@@ -28,77 +29,195 @@ interface CartContextValue {
   updateQty: (product_id: number, qty: number) => void;
   removeItem: (product_id: number) => void;
   clearCart: () => void;
-  bulkUpdatePrices: (priceMap: Record<number, number>) => void;
+  refreshPrices: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
 
 const STORAGE_KEY = "fastweb_cart";
+const EMPTY_CART: CartItem[] = [];
+const cartListeners = new Set<() => void>();
+let cachedRawCart: string | null | undefined;
+let cachedCartItems: CartItem[] = EMPTY_CART;
+
+function isCartItem(value: unknown): value is CartItem {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<CartItem>;
+  return (
+    Number.isInteger(item.product_id) &&
+    typeof item.name === "string" &&
+    (typeof item.sku === "string" || item.sku === null) &&
+    (typeof item.image === "string" || item.image === null) &&
+    typeof item.price === "number" &&
+    Number.isFinite(item.price) &&
+    item.price >= 0 &&
+    Number.isInteger(item.quantity) &&
+    Number(item.quantity) > 0
+  );
+}
+
+function getCartSnapshot(): CartItem[] {
+  if (typeof window === "undefined") return EMPTY_CART;
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === cachedRawCart) return cachedCartItems;
+
+    cachedRawCart = stored;
+    if (!stored) {
+      cachedCartItems = EMPTY_CART;
+      return cachedCartItems;
+    }
+
+    const parsed: unknown = JSON.parse(stored);
+    cachedCartItems = Array.isArray(parsed) ? parsed.filter(isCartItem) : EMPTY_CART;
+    return cachedCartItems;
+  } catch {
+    return cachedCartItems;
+  }
+}
+
+function getServerCartSnapshot() {
+  return EMPTY_CART;
+}
+
+function subscribeToCart(listener: () => void) {
+  cartListeners.add(listener);
+
+  function handleStorage(event: StorageEvent) {
+    if (event.key === STORAGE_KEY) {
+      cachedRawCart = undefined;
+      listener();
+    }
+  }
+
+  window.addEventListener("storage", handleStorage);
+  return () => {
+    cartListeners.delete(listener);
+    window.removeEventListener("storage", handleStorage);
+  };
+}
+
+function writeCartItems(items: CartItem[]) {
+  const serialized = JSON.stringify(items);
+  cachedRawCart = serialized;
+  cachedCartItems = items;
+
+  try {
+    localStorage.setItem(STORAGE_KEY, serialized);
+  } catch {
+    // Keep the in-memory cart usable when browser storage is unavailable.
+  }
+
+  cartListeners.forEach((listener) => listener());
+}
+
+export function clearStoredCart() {
+  cachedRawCart = null;
+  cachedCartItems = EMPTY_CART;
+
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // The in-memory cart is still cleared when browser storage is unavailable.
+  }
+
+  cartListeners.forEach((listener) => listener());
+}
+
+function updateCartItems(updater: (items: CartItem[]) => CartItem[]) {
+  writeCartItems(updater(getCartSnapshot()));
+}
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [hydrated, setHydrated] = useState(false);
-
-  // Rehydrate from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) setItems(JSON.parse(stored));
-    } catch {
-      // ignore corrupt storage
-    }
-    setHydrated(true);
-  }, []);
-
-  // Persist to localStorage whenever items change (after hydration)
-  useEffect(() => {
-    if (hydrated) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    }
-  }, [items, hydrated]);
+  const items = useSyncExternalStore(
+    subscribeToCart,
+    getCartSnapshot,
+    getServerCartSnapshot
+  );
 
   const addItem = useCallback(
     (item: Omit<CartItem, "quantity">, qty: number) => {
-      setItems((prev) => {
+      const safeQty = Math.max(0, Math.trunc(qty));
+      if (safeQty === 0 || !Number.isFinite(item.price) || item.price < 0) return;
+      updateCartItems((prev) => {
         const existing = prev.find((i) => i.product_id === item.product_id);
         if (existing) {
           return prev.map((i) =>
             i.product_id === item.product_id
-              ? { ...i, quantity: i.quantity + qty }
+              ? { ...i, quantity: i.quantity + safeQty }
               : i
           );
         }
-        return [...prev, { ...item, quantity: qty }];
+        return [...prev, { ...item, quantity: safeQty }];
       });
     },
     []
   );
 
   const updateQty = useCallback((product_id: number, qty: number) => {
-    if (qty <= 0) {
-      setItems((prev) => prev.filter((i) => i.product_id !== product_id));
+    const safeQty = Math.max(0, Math.trunc(qty));
+    if (safeQty <= 0) {
+      updateCartItems((prev) => prev.filter((i) => i.product_id !== product_id));
     } else {
-      setItems((prev) =>
+      updateCartItems((prev) =>
         prev.map((i) =>
-          i.product_id === product_id ? { ...i, quantity: qty } : i
+          i.product_id === product_id ? { ...i, quantity: safeQty } : i
         )
       );
     }
   }, []);
 
   const removeItem = useCallback((product_id: number) => {
-    setItems((prev) => prev.filter((i) => i.product_id !== product_id));
+    updateCartItems((prev) => prev.filter((i) => i.product_id !== product_id));
   }, []);
 
-  const clearCart = useCallback(() => setItems([]), []);
+  const clearCart = useCallback(() => clearStoredCart(), []);
 
-  const bulkUpdatePrices = useCallback((priceMap: Record<number, number>) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        priceMap[item.product_id] !== undefined
-          ? { ...item, price: priceMap[item.product_id] }
-          : item
+  const refreshPrices = useCallback(async () => {
+    const currentItems = getCartSnapshot();
+    if (currentItems.length === 0) return;
+
+    const refreshed = await Promise.allSettled(
+      currentItems.map((item) =>
+        api.get<{
+          id: number;
+          name: string;
+          sku: string | null;
+          image: string | null;
+          current_price: number | string | null;
+          sale_price: number | string | null;
+          regular_price: number | string | null;
+          parent_id?: number | null;
+        }>(`/products/${item.product_id}`)
       )
+    );
+
+    updateCartItems((items) =>
+      items.map((item) => {
+        const index = currentItems.findIndex(
+          (current) => current.product_id === item.product_id
+        );
+        const result = refreshed[index];
+        if (!result || result.status !== "fulfilled") return item;
+
+        const product = result.value.data;
+        const rawPrice =
+          product.current_price ?? product.sale_price ?? product.regular_price;
+        const price = rawPrice === null ? null : Number(rawPrice);
+        const hasPrice =
+          price !== null && Number.isFinite(price) && price >= 0;
+
+        return {
+          ...item,
+          name: product.name || item.name,
+          sku: product.sku ?? item.sku,
+          image: product.image ?? item.image,
+          parent_id: product.parent_id ?? item.parent_id,
+          price: hasPrice ? price : item.price,
+          price_pending: !hasPrice,
+        };
+      })
     );
   }, []);
 
@@ -107,7 +226,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, itemCount, subtotal, addItem, updateQty, removeItem, clearCart, bulkUpdatePrices }}
+      value={{
+        items,
+        itemCount,
+        subtotal,
+        addItem,
+        updateQty,
+        removeItem,
+        clearCart,
+        refreshPrices,
+      }}
     >
       {children}
     </CartContext.Provider>

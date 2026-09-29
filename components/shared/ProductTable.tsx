@@ -3,7 +3,19 @@
 import { useState, Fragment, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, ImageIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import { StockDot } from "./StockDot";
 import { QtyStepper } from "./QtyStepper";
 import { PriceGate } from "./PriceGate";
@@ -21,34 +33,7 @@ interface ProductTableProps {
   onQtyChange?: (qtyMap: Record<number, number>) => void;
 }
 
-function ImagePlaceholder({ size = 36 }: { size?: number }) {
-  return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        background:
-          "repeating-linear-gradient(135deg, #E5DFD0 0 7px, #D9D3C5 7px 14px)",
-        flexShrink: 0,
-      }}
-    />
-  );
-}
-
-function SkeletonRow({ showBrand }: { showBrand: boolean }) {
-  return (
-    <tr className="border-b border-brand-line">
-      {[...Array(showBrand ? 8 : 7)].map((_, i) => (
-        <td key={i} className="px-2.5 py-2">
-          <div className="h-4 bg-brand-bg-alt rounded animate-pulse" />
-        </td>
-      ))}
-    </tr>
-  );
-}
-
-const TH = "px-2.5 py-2.5 text-left font-mono text-[10px] tracking-[0.08em] uppercase text-brand-muted font-medium border-b border-brand-line bg-brand-bg-alt whitespace-nowrap";
-const TD = "px-2.5 py-2 text-[12.5px] text-brand-ink border-b border-brand-line align-middle";
+const TH = "text-[11px] font-medium uppercase tracking-wide text-muted-foreground";
 
 export function ProductTable({
   products,
@@ -60,6 +45,8 @@ export function ProductTable({
   const [qtyMap, setQtyMap] = useState<Record<number, number>>({});
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
+  const columnCount = 7 + (showBrand ? 1 : 0) + (showDiscountPct ? 1 : 0);
+
   function setQty(productId: number, qty: number) {
     const next = { ...qtyMap, [productId]: qty };
     setQtyMap(next);
@@ -69,7 +56,11 @@ export function ProductTable({
   function toggleExpand(id: number) {
     setExpanded((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   }
@@ -78,12 +69,12 @@ export function ProductTable({
     return (
       <PriceGate pricesVisible={p.prices_visible}>
         {p.on_sale && p.sale_price !== null ? (
-          <span className="flex flex-col leading-snug font-mono">
-            <span className="text-[#B83434] font-semibold">${p.sale_price.toFixed(2)}</span>
-            <span className="text-brand-muted line-through text-[11px]">${p.regular_price?.toFixed(2)}</span>
+          <span className="flex flex-col font-mono leading-snug">
+            <span className="text-destructive font-semibold">${p.sale_price.toFixed(2)}</span>
+            <span className="text-muted-foreground line-through text-[11px]">${p.regular_price?.toFixed(2)}</span>
           </span>
         ) : (
-          <span className="font-mono font-semibold">
+          <span className="font-mono font-semibold text-foreground">
             {p.current_price !== null ? `$${p.current_price.toFixed(2)}` : "—"}
           </span>
         )}
@@ -92,9 +83,9 @@ export function ProductTable({
   }
 
   function renderDiscountPct(p: Product) {
-    if (!p.prices_visible || !p.on_sale || !p.sale_price || !p.regular_price) return <span className="text-brand-muted">—</span>;
+    if (!p.prices_visible || !p.on_sale || !p.sale_price || !p.regular_price) return <span className="text-muted-foreground">—</span>;
     const pct = Math.round((1 - p.sale_price / p.regular_price) * 100);
-    return <span className="font-mono text-[#B83434] font-semibold">{pct}%</span>;
+    return <span className="font-mono text-destructive font-semibold">{pct}%</span>;
   }
 
   function renderRow(p: Product, isChild = false): ReactNode {
@@ -103,153 +94,148 @@ export function ProductTable({
 
     return (
       <Fragment key={p.id}>
-        <tr
-          className={`border-b border-brand-line hover:bg-brand-bg transition-colors ${isChild ? "bg-brand-bg/50" : ""}`}
-        >
-          {/* Expand toggle / indent for children */}
-          <td className={`${TD} w-7`}>
+        <TableRow className={cn("text-[12.5px]", isChild && "bg-muted/30")}>
+          <TableCell className="w-8">
             {isGrouped ? (
-              <button
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => toggleExpand(p.id)}
-                className="text-brand-muted hover:text-brand-ink transition-colors"
                 aria-label={isOpen ? "Collapse variants" : "Expand variants"}
               >
-                {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-              </button>
+                {isOpen ? <ChevronDown /> : <ChevronRight />}
+              </Button>
             ) : isChild ? (
-              <span className="block w-3 h-px bg-brand-line ml-2" />
+              <span className="ml-2 block h-px w-3 bg-border" />
             ) : null}
-          </td>
+          </TableCell>
 
-          {/* Image */}
-          <td className={`${TD} w-14`}>
-            <div className="w-9 h-9 overflow-hidden rounded-[var(--brand-radius)] shrink-0">
+          <TableCell className="w-14">
+            <div className="size-9 shrink-0 overflow-hidden rounded-md bg-muted">
               {p.image ? (
                 <Image
                   src={p.image}
                   alt={p.name}
                   width={36}
                   height={36}
-                  className="object-cover w-full h-full"
+                  className="h-full w-full object-cover"
                   unoptimized
                 />
               ) : (
-                <ImagePlaceholder />
+                <div className="flex h-full w-full items-center justify-center text-muted-foreground/40">
+                  <ImageIcon className="size-4" />
+                </div>
               )}
             </div>
-          </td>
+          </TableCell>
 
-          {/* SKU */}
-          <td className={`${TD} w-24`}>
-            <span className="font-mono text-[11px] text-brand-muted">{p.sku}</span>
-          </td>
+          <TableCell className="w-24">
+            <span className="font-mono text-[11px] text-muted-foreground">{p.sku}</span>
+          </TableCell>
 
-          {/* Product name */}
-          <td className={TD}>
+          <TableCell className="whitespace-normal">
             <div className="flex items-center gap-2">
               <Link
                 href={`/product/${p.id}`}
-                className="font-medium text-brand-ink hover:text-brand-blue transition-colors"
+                className="font-semibold text-foreground transition-colors hover:text-primary"
               >
                 {p.name}
               </Link>
-              {p.on_sale && (
-                <span className="bg-[#B83434] text-white font-mono text-[9px] tracking-[0.06em] px-1.5 py-0.5 leading-none shrink-0">
-                  SALE
-                </span>
-              )}
+              {p.on_sale && <Badge variant="destructive" className="font-mono">Sale</Badge>}
               {isGrouped && (
-                <span className="text-brand-muted font-mono text-[10px]">
+                <span className="font-mono text-[10px] text-muted-foreground">
                   · {p.children!.length} variants
                 </span>
               )}
             </div>
-          </td>
+          </TableCell>
 
-          {/* Brand */}
           {showBrand && (
-            <td className={`${TD} w-32`}>
+            <TableCell className="w-32">
               {p.brand?.id ? (
                 <Link
                   href={`/brand/${p.brand.id}`}
-                  className="text-brand-blue text-[12px] hover:text-brand-blue-deep transition-colors"
+                  className="text-[12px] text-primary transition-colors hover:text-primary/80"
                 >
                   {p.brand.name}
                 </Link>
               ) : (
-                <span className="text-brand-muted text-[12px]">{p.brand?.name}</span>
+                <span className="text-[12px] text-muted-foreground">{p.brand?.name}</span>
               )}
-            </td>
+            </TableCell>
           )}
 
-          {/* Price */}
-          <td className={`${TD} w-24 text-right`}>{renderPriceCell(p)}</td>
+          <TableCell className="w-24 text-right">{renderPriceCell(p)}</TableCell>
 
-          {/* Off % — sale page only */}
           {showDiscountPct && (
-            <td className={`${TD} w-16 text-right`}>{renderDiscountPct(p)}</td>
+            <TableCell className="w-16 text-right">{renderDiscountPct(p)}</TableCell>
           )}
 
-          {/* Stock */}
-          <td className={`${TD} w-28`}>
+          <TableCell className="w-28">
             <StockDot inStock={p.in_stock} stockQuantity={p.stock_quantity} />
-          </td>
+          </TableCell>
 
-          {/* Qty stepper */}
-          <td className={`${TD} w-28 text-right`}>
+          <TableCell className="w-28 text-right">
             {isGrouped ? (
-              <span className="text-brand-muted font-mono text-[11px]">— expand —</span>
+              <span className="font-mono text-[11px] text-muted-foreground">— expand —</span>
+            ) : !p.in_stock ? (
+              <span className="font-mono text-[10px] uppercase text-muted-foreground">Out of stock</span>
             ) : (
               <QtyStepper
                 value={qtyMap[p.id] ?? 0}
                 onChange={(n) => setQty(p.id, n)}
-                disabled={!p.in_stock}
+                max={p.stock_quantity ?? undefined}
               />
             )}
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
 
-        {/* Expanded children rows */}
         {isGrouped && isOpen && p.children!.map((child) => renderRow(child, true))}
       </Fragment>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse bg-brand-white text-sm">
-        <thead>
-          <tr>
-            <th className={`${TH} w-7`} />
-            <th className={`${TH} w-14`}>Img</th>
-            <th className={`${TH} w-24`}>SKU</th>
-            <th className={TH}>Product</th>
-            {showBrand && <th className={`${TH} w-32`}>Brand</th>}
-            <th className={`${TH} w-24 text-right`}>Price</th>
-            {showDiscountPct && <th className={`${TH} w-16 text-right`}>Off</th>}
-            <th className={`${TH} w-28`}>Stock</th>
-            <th className={`${TH} w-28 text-right`}>Qty</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div className="overflow-hidden rounded-lg border border-border bg-card">
+      <Table>
+        <TableHeader className="bg-muted/50">
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="w-8" />
+            <TableHead className={cn(TH, "w-14")}>Img</TableHead>
+            <TableHead className={cn(TH, "w-24")}>SKU</TableHead>
+            <TableHead className={TH}>Product</TableHead>
+            {showBrand && <TableHead className={cn(TH, "w-32")}>Brand</TableHead>}
+            <TableHead className={cn(TH, "w-24 text-right")}>Price</TableHead>
+            {showDiscountPct && <TableHead className={cn(TH, "w-16 text-right")}>Off</TableHead>}
+            <TableHead className={cn(TH, "w-28")}>Stock</TableHead>
+            <TableHead className={cn(TH, "w-28 text-right")}>Qty</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => (
-              <SkeletonRow key={i} showBrand={showBrand} />
+              <TableRow key={i}>
+                {Array.from({ length: columnCount }).map((_, j) => (
+                  <TableCell key={j}>
+                    <Skeleton className="h-4" />
+                  </TableCell>
+                ))}
+              </TableRow>
             ))
           ) : products.length === 0 ? (
-            <tr>
-              <td
-                colSpan={showBrand ? 9 : 8}
-                className="px-4 py-12 text-center font-mono text-[11px] text-brand-muted tracking-[0.06em] uppercase"
+            <TableRow className="hover:bg-transparent">
+              <TableCell
+                colSpan={columnCount}
+                className="py-12 text-center font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground"
               >
                 No products found
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ) : (
             products.map((p) => renderRow(p))
           )}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

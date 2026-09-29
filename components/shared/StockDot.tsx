@@ -1,41 +1,29 @@
+import { cn } from "@/lib/utils";
+
 interface StockDotProps {
   inStock: boolean;
   stockQuantity: number | null;
 }
 
 export function StockDot({ inStock, stockQuantity }: StockDotProps) {
+  let dotClass = "bg-emerald-600";
+  let label = "In stock";
+  let textClass = "text-muted-foreground";
+
   if (!inStock) {
-    return (
-      <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-brand-muted">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#9CA3AF] shrink-0" />
-        Out of stock
-      </span>
-    );
+    dotClass = "bg-muted-foreground";
+    label = "Out of stock";
+  } else if (stockQuantity !== null) {
+    dotClass =
+      stockQuantity < 100 ? "bg-destructive" : stockQuantity < 400 ? "bg-amber-500" : "bg-emerald-600";
+    label = stockQuantity.toLocaleString();
+    textClass = "text-foreground";
   }
-
-  if (stockQuantity === null) {
-    return (
-      <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-brand-muted">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#1F8A3A] shrink-0" />
-        In stock
-      </span>
-    );
-  }
-
-  const dotColor =
-    stockQuantity < 100
-      ? "#FF6B1A"   // orange — low stock
-      : stockQuantity < 400
-      ? "#C8951A"   // amber — medium stock
-      : "#1F8A3A";  // green — healthy stock
 
   return (
-    <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-brand-ink">
-      <span
-        className="w-1.5 h-1.5 rounded-full shrink-0"
-        style={{ background: dotColor }}
-      />
-      {stockQuantity.toLocaleString()}
+    <span className={cn("inline-flex items-center gap-1.5 font-mono text-[11px]", textClass)}>
+      <span className={cn("size-1.5 shrink-0 rounded-full", dotClass)} />
+      {label}
     </span>
   );
 }
