@@ -202,12 +202,12 @@ function BannerGrid({ items }: { items: HomepageItem[] }) {
   );
 }
 
-function ManagedBanners({ section }: { section: HomepageSection }) {
+function ManagedBanners({ section, compressTop, compressBottom }: { section: HomepageSection; compressTop?: boolean; compressBottom?: boolean }) {
   const banners = section.items.filter((item) => item.kind === "content" && item.desktop_image_url);
   const hasHeading = section.items.some((item) => item.kind === "heading" && (item.desktop_image_url || item.video_url));
   if (banners.length === 0 && !hasHeading) return null;
   return (
-    <Section className="py-3 md:py-4">
+    <Section className={cn("py-3 md:py-4", compressTop && "pt-0 md:pt-0", compressBottom && "pb-0 md:pb-0")}>
       <HeadingBanner section={section} />
       <BannerGrid items={banners} />
     </Section>
@@ -483,12 +483,22 @@ function CatalogShowcase({ section }: { section: HomepageSection }) {
   );
 }
 
-function ManagedSection({ section, products }: { section: HomepageSection; products: Map<number, Product> }) {
+function ManagedSection({
+  section,
+  products,
+  compressTop,
+  compressBottom,
+}: {
+  section: HomepageSection;
+  products: Map<number, Product>;
+  compressTop?: boolean;
+  compressBottom?: boolean;
+}) {
   switch (section.type) {
     case "hero":
       return <HeroRow main={section} />;
     case "banner":
-      return <ManagedBanners section={section} />;
+      return <ManagedBanners section={section} compressTop={compressTop} compressBottom={compressBottom} />;
     case "featured_category":
       return <CategoryGrid section={section} />;
     case "product_carousel": {
@@ -535,13 +545,16 @@ export default function HomePage() {
   const { homepage, site, loaded, error } = useSiteConfig();
   const sections = useMemo(() => homepage?.sections ?? [], [homepage]);
   const rows = useMemo(() => {
-    const result: [HomepageSection, HomepageSection?][] = [];
+    const result: [HomepageSection, HomepageSection?, boolean?, boolean?][] = [];
     for (let i = 0; i < sections.length; i++) {
       if (sections[i].type === "hero" && sections[i + 1]?.type === "hero") {
         result.push([sections[i], sections[i + 1]]);
         i++;
       } else {
-        result.push([sections[i]]);
+        const isBanner = sections[i].type === "banner";
+        const compressTop = isBanner && sections[i - 1]?.type === "banner";
+        const compressBottom = isBanner && sections[i + 1]?.type === "banner";
+        result.push([sections[i], undefined, compressTop, compressBottom]);
       }
     }
     return result;
@@ -562,11 +575,11 @@ export default function HomePage() {
         </Section>
       )}
       {loaded && (error || !homepage) && <LiveFallback />}
-      {rows.map(([section, side]) =>
+      {rows.map(([section, side, compressTop, compressBottom]) =>
         side ? (
           <HeroRow key={section.id} main={section} side={side} />
         ) : (
-          <ManagedSection key={section.id} section={section} products={productsById} />
+          <ManagedSection key={section.id} section={section} products={productsById} compressTop={compressTop} compressBottom={compressBottom} />
         )
       )}
     </div>
