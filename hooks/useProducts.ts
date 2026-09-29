@@ -49,6 +49,7 @@ export interface ProductsParams {
   sort?: "name_asc" | "price_asc" | "price_desc" | "newest";
   per_page?: number;
   page?: number;
+  ids?: number[];
 }
 
 function toNum(v: unknown): number | null {
@@ -75,6 +76,7 @@ export function useProducts(params: ProductsParams = {}) {
         .get<ProductsResponse>("/products", {
           params: {
             ...params,
+            ids: params.ids?.length ? params.ids.join(",") : undefined,
             in_stock: params.in_stock,
           },
         })
