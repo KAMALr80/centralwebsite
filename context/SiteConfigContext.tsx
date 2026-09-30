@@ -32,6 +32,7 @@ export interface SiteSettings {
   footer_legal_notice?: string;
   footer_tagline?: string;
   footer_assistance_title?: string;
+  footer_whatsapp_notice?: string;
   business_hours_title?: string;
   view_all_label?: string;
   all_brands_label?: string;
@@ -55,6 +56,9 @@ export interface SiteSettings {
   }[];
   footer_columns?: { title: string; links: { label: string; url: string }[] }[];
   business_hours?: string[];
+  social_facebook_url?: string;
+  social_instagram_url?: string;
+  social_whatsapp_url?: string;
 }
 
 export interface HomepageItem {

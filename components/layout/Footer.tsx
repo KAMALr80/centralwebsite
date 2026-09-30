@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, MapPin, Phone, Send } from "lucide-react";
+import { ChevronDown, ChevronUp, Mail, MessageCircle, Phone, Send } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +14,12 @@ const DEFAULT_COLUMNS = [
     links: [
       { label: "Cigar Accessories", url: "/shop?search=cigar%20accessories" },
       { label: "Cleaning Products", url: "/shop?search=cleaning" },
-      { label: "Detox Supplements", url: "/shop?search=detox" },
-      { label: "Category Directory", url: "/shop" },
+      { label: "Detox Supplements and Health", url: "/shop?search=detox" },
     ],
+  },
+  {
+    title: "Navigation",
+    links: [{ label: "Wishlist", url: "/wishlist" }],
   },
   {
     title: "Customer Support",
@@ -29,6 +32,32 @@ const DEFAULT_COLUMNS = [
   },
 ];
 
+function FacebookIcon(props: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={props.className} aria-hidden="true">
+      <path d="M13.5 22v-8.5H16l.5-3.5h-3V7.7c0-1 .3-1.7 1.7-1.7H16.6V2.8C16.3 2.8 15.3 2.7 14.2 2.7c-2.4 0-4.1 1.5-4.1 4.2v2.1H7.5V13H10v9h3.5z" />
+    </svg>
+  );
+}
+
+function InstagramIcon(props: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={props.className} aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function WhatsappIcon(props: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={props.className} aria-hidden="true">
+      <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.1 8.1 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.6.1s-.6.8-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.6-1.2.1-.1 0-.3 0-.4l-.7-1.6c-.2-.4-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3a2.7 2.7 0 0 0-.9 2 4.7 4.7 0 0 0 1 2.5 10.7 10.7 0 0 0 4.5 4c.6.2 1.1.4 1.5.5a3.5 3.5 0 0 0 1.6.1c.5-.1 1.4-.6 1.6-1.1s.2-1 .1-1.1-.2-.2-.4-.3Z" />
+    </svg>
+  );
+}
+
 const DEFAULT_BUSINESS_HOURS = [
   "Monday: 9:00 AM - 7:00 PM",
   "Tuesday: 9:00 AM - 7:00 PM",
@@ -36,6 +65,7 @@ const DEFAULT_BUSINESS_HOURS = [
   "Thursday: 9:00 AM - 7:00 PM",
   "Friday: 9:00 AM - 7:00 PM",
   "Saturday: 10:00 AM - 5:00 PM",
+  "Sunday: Closed",
 ];
 
 const headingClass =
@@ -47,13 +77,11 @@ export function Footer() {
   const { site } = useSiteConfig();
   const year = new Date().getFullYear();
 
-  const companyName = site.site_name || "Central Smoke Distro";
-  const tagline = site.footer_tagline || "A wholesale marketplace built for independent retailers. 600+ vetted brands, one invoice, sixty-day terms.";
-  const assistanceTitle = site.footer_assistance_title || "Need Assistance?";
+  const assistanceTitle = site.footer_assistance_title || "Need Assistance? Call us!";
   const phone = site.phone || "+1 (914) 539-5580";
   const email = site.email || "info@centralsmokedistro.com";
   const supportEmail = site.support_email || "support@centralsmokedistro.com";
-  const address = site.address || "Brooklyn - Portland - Chicago";
+  const whatsappNotice = site.footer_whatsapp_notice || "Text or Whatsapp Available 24/7!";
   const columns = site.footer_columns?.length ? site.footer_columns : DEFAULT_COLUMNS;
   const businessHoursTitle = site.business_hours_title || "Business Hours";
   const businessHours = site.business_hours?.length ? site.business_hours : DEFAULT_BUSINESS_HOURS;
@@ -61,11 +89,36 @@ export function Footer() {
   const newsletterTitle = site.newsletter_title || "Sign up to Newsletter";
   const newsletterPlaceholder = site.newsletter_placeholder || "Enter your email address";
   const newsletterButtonText = site.newsletter_button_text || "Sign up";
-  const footerCopyright = site.footer_copyright || `${companyName} Wholesale Inc.`;
-  const footerLegalNotice = site.footer_legal_notice || "Free freight over $500 - Net-60 terms available";
+  const footerCopyright = site.footer_copyright || "Central Smoke Distribution";
+  const footerCredit = site.footer_legal_notice || "Proudly Powered by Brainbean Technolabs";
+  const facebookUrl = site.social_facebook_url;
+  const instagramUrl = site.social_instagram_url;
+  const whatsappUrl = site.social_whatsapp_url;
+  const hasSocial = Boolean(facebookUrl || instagramUrl || whatsappUrl);
+
+  const contactRows = (
+    <ul className="space-y-3.5 text-[15px] leading-6 text-muted-foreground">
+      <li className="flex gap-3">
+        <Phone size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
+        <a href={`tel:${phone.replace(/[^+\d]/g, "")}`} className={linkClass}>{phone}</a>
+      </li>
+      <li className="flex gap-3 font-semibold text-foreground">
+        <MessageCircle size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
+        <span>{whatsappNotice}</span>
+      </li>
+      <li className="flex gap-3">
+        <Mail size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
+        <a href={`mailto:${email}`} className={`${linkClass} min-w-0 break-words`}>{email}</a>
+      </li>
+      <li className="flex gap-3">
+        <Mail size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
+        <a href={`mailto:${supportEmail}`} className={`${linkClass} min-w-0 break-words`}>{supportEmail}</a>
+      </li>
+    </ul>
+  );
 
   return (
-    <footer className="border-t border-border bg-card text-foreground">
+    <footer className="relative border-t-4 border-primary bg-card text-foreground">
       {newsletterEnabled && (
         <div className="border-b border-white/10 bg-foreground px-6 py-4 text-white lg:px-10">
           <div className="mx-auto flex max-w-[1768px] flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -87,36 +140,19 @@ export function Footer() {
         </div>
       )}
 
-      <div className="mx-auto grid max-w-[1760px] gap-x-10 gap-y-10 px-6 py-10 sm:grid-cols-2 lg:grid-cols-3 lg:px-10 lg:py-11 xl:grid-cols-[1fr_1.45fr_0.9fr_1fr_1.35fr] 2xl:grid-cols-[210px_340px_230px_250px_330px] 2xl:justify-between">
-        <div className="sm:col-span-2 lg:col-span-1">
+      <div className="mx-auto hidden max-w-[1760px] gap-x-8 gap-y-10 px-6 py-10 lg:grid lg:grid-cols-3 lg:px-10 lg:py-11 xl:grid-cols-[1fr_1.4fr_0.85fr_0.55fr_0.85fr_1.25fr] 2xl:grid-cols-[210px_330px_220px_140px_220px_300px] 2xl:justify-between">
+        <div className="lg:col-span-1">
           <Logo size={110} />
-          <p className="mt-5 max-w-[230px] text-[15px] leading-7 text-muted-foreground">
-            {tagline}
-          </p>
+          {site.footer_tagline && (
+            <p className="mt-5 max-w-[230px] text-[15px] leading-7 text-muted-foreground">
+              {site.footer_tagline}
+            </p>
+          )}
         </div>
 
         <div>
           <h2 className={headingClass}>{assistanceTitle}</h2>
-          <address className="not-italic">
-            <ul className="space-y-3.5 text-[15px] leading-6 text-muted-foreground">
-              <li className="flex gap-3">
-                <Phone size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
-                <a href={`tel:${phone.replace(/[^+\d]/g, "")}`} className={linkClass}>{phone}</a>
-              </li>
-              <li className="flex gap-3">
-                <Mail size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
-                <a href={`mailto:${email}`} className={`${linkClass} min-w-0 break-words`}>{email}</a>
-              </li>
-              <li className="flex gap-3">
-                <Mail size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
-                <a href={`mailto:${supportEmail}`} className={`${linkClass} min-w-0 break-words`}>{supportEmail}</a>
-              </li>
-              <li className="flex gap-3">
-                <MapPin size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
-                <span>{address}</span>
-              </li>
-            </ul>
-          </address>
+          <address className="not-italic">{contactRows}</address>
         </div>
 
         {columns.map((column) => (
@@ -148,12 +184,86 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-border bg-muted/40 px-6 py-4 lg:px-10">
-        <div className="mx-auto flex max-w-[1680px] flex-col gap-2 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <span>© {year} {footerCopyright}</span>
-          <span>{footerLegalNotice}</span>
+      <div className="lg:hidden">
+        <div className="divide-y divide-border border-t border-border px-6">
+          {columns.map((column) => (
+            <details key={column.title} className="group py-1">
+              <summary className="flex cursor-pointer list-none items-center justify-between py-3 text-[15px] font-bold text-foreground">
+                {column.title}
+                <ChevronDown size={18} className="shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+              </summary>
+              <ul className="space-y-3 pb-4 text-[15px] leading-6">
+                {column.links.map((item) => (
+                  <li key={item.label}>
+                    <Link href={item.url} className={linkClass}>{item.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ))}
+          <details className="group py-1">
+            <summary className="flex cursor-pointer list-none items-center justify-between py-3 text-[15px] font-bold text-foreground">
+              {businessHoursTitle}
+              <ChevronDown size={18} className="shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+            </summary>
+            <ul className="space-y-2 pb-4 text-[15px] leading-6 text-muted-foreground">
+              {businessHours.map((entry) => {
+                const [day, hours] = entry.includes(":") ? [entry.slice(0, entry.indexOf(":")), entry.slice(entry.indexOf(":") + 1).trim()] : [entry, ""];
+                return (
+                  <li key={entry} className="grid grid-cols-[90px_1fr] gap-3">
+                    <span>{day}</span>
+                    <span className="whitespace-nowrap">{hours}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </details>
+        </div>
+
+        {hasSocial && (
+          <div className="flex justify-center gap-5 py-6">
+            {facebookUrl && (
+              <a href={facebookUrl} target="_blank" rel="noreferrer" aria-label="Facebook" className="flex size-9 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-primary hover:text-primary-foreground">
+                <FacebookIcon className="size-4" />
+              </a>
+            )}
+            {whatsappUrl && (
+              <a href={whatsappUrl} target="_blank" rel="noreferrer" aria-label="WhatsApp" className="flex size-9 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-primary hover:text-primary-foreground">
+                <WhatsappIcon className="size-4" />
+              </a>
+            )}
+            {instagramUrl && (
+              <a href={instagramUrl} target="_blank" rel="noreferrer" aria-label="Instagram" className="flex size-9 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-primary hover:text-primary-foreground">
+                <InstagramIcon className="size-4" />
+              </a>
+            )}
+          </div>
+        )}
+
+        <div className="border-t border-border bg-muted/30 px-6 py-8 text-center">
+          <div className="flex justify-center">
+            <Logo size={90} />
+          </div>
+          <h2 className={`${headingClass} mt-5`}>{assistanceTitle}</h2>
+          <address className="mx-auto inline-block text-left not-italic">{contactRows}</address>
         </div>
       </div>
+
+      <div className="border-t border-border bg-muted/40 px-6 py-4 lg:px-10">
+        <div className="mx-auto max-w-[1680px] text-center text-[13px] text-muted-foreground">
+          © {footerCopyright} - {year} - All Rights Reserved
+          {footerCredit && <> | {footerCredit}</>}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        aria-label="Scroll to top"
+        className="absolute -top-6 right-6 flex size-11 items-center justify-center rounded-full bg-foreground/70 text-background shadow-md transition-colors hover:bg-foreground"
+      >
+        <ChevronUp size={22} />
+      </button>
     </footer>
   );
 }

@@ -190,7 +190,7 @@ function HeroRow({ main, side }: { main: HomepageSection; side?: HomepageSection
 function BannerGrid({ items }: { items: HomepageItem[] }) {
   if (items.length === 0) return null;
   const gridColsClass =
-    items.length <= 2 ? "lg:grid-cols-[2fr_1fr]" : items.length === 3 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
+    items.length <= 2 ? "lg:grid-cols-[2fr_1fr]" : items.length === 3 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2 lg:grid-cols-4";
   return (
     <div className={cn("grid gap-4", gridColsClass)}>
       {items.map((item) => (
@@ -258,7 +258,7 @@ function CategoryGrid({ section }: { section: HomepageSection }) {
   return (
     <Section>
       <ManagedHeader section={section} href="/shop" />
-      <div className={cn("grid gap-4", isBannerStyle ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6")}>
+      <div className={cn("grid gap-4", isBannerStyle ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6")}>
         {tiles.map((tile) =>
           isBannerStyle ? (
             <MaybeLink
@@ -421,13 +421,13 @@ function BrandShowcase({ section }: { section: HomepageSection }) {
   return (
     <Section>
       <ManagedHeader section={section} href="/brands" linkLabel={site.all_brands_label || "All brands"} />
-      <div className="flex flex-wrap justify-center gap-6 rounded-xl bg-card px-6 py-8">
+      <div className="hidden justify-center gap-6 rounded-xl bg-card px-6 py-8 lg:flex">
         {logos.map((logo) => (
           <MaybeLink
             key={logo.id}
             href={logo.link_url}
             label={logo.alt_text || logo.title || undefined}
-            className="group flex w-[calc((100%-1.5rem)/2)] flex-col items-center gap-3 text-center no-underline sm:w-[calc((100%-3rem)/3)] md:w-[calc((100%-4.5rem)/4)] lg:w-[calc((100%-9rem)/7)]"
+            className="group flex flex-col items-center gap-3 text-center no-underline lg:w-[calc((100%-9rem)/7)]"
           >
             <span className="relative block size-24 overflow-hidden rounded-full bg-muted shadow-sm transition-shadow group-hover:shadow-md group-hover:ring-1 group-hover:ring-primary/40 md:size-28">
               {logo.video_url ? (
