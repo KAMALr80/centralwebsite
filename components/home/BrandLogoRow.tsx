@@ -30,7 +30,7 @@ export function BrandLogoRow() {
               >
                 <div className="w-16 h-16 rounded-full overflow-hidden border border-brand-line group-hover:border-brand-blue transition-colors relative shrink-0">
                   {brand.image ? (
-                    <Image src={brand.image} alt={brand.name} fill sizes="64px" className="object-cover" />
+                    <Image src={brand.image} alt={brand.name} fill sizes="64px" className="object-cover" unoptimized />
                   ) : (
                     <Placeholder tone="cool" className="h-full" />
                   )}

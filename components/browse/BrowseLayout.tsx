@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useEffect, useMemo, type ReactNode } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { X, SlidersHorizontal, LayoutList, LayoutGrid } from "lucide-react";
+import { X, SlidersHorizontal, LayoutList, LayoutGrid, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -74,6 +75,7 @@ export function BrowseLayout({
   // Local state
   const [qtyMap, setQtyMap] = useState<Record<number, number>>({});
   const [brandSearch, setBrandSearch] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [view, setView] = useState<"list" | "grid">("list");
   const { items: cartItems, addItem, updateQty } = useCart();
   const { isAuthenticated } = useAuth();
@@ -328,19 +330,26 @@ export function BrowseLayout({
         {/* ── Filters sidebar ──────────────────────────────── */}
         <aside className="w-full shrink-0 lg:w-[240px]">
           <Card size="sm" className="gap-0 py-0">
-            <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+            <div className={cn("flex items-center justify-between px-4 py-3 lg:border-b lg:border-border", filtersOpen && "border-b border-border")}>
+              <button
+                type="button"
+                onClick={() => setFiltersOpen((open) => !open)}
+                aria-expanded={filtersOpen}
+                className="flex flex-1 items-center gap-1.5 text-left text-xs font-semibold text-foreground lg:pointer-events-none"
+              >
                 <SlidersHorizontal className="size-3.5" />
                 Filters
                 {activeFilterCount > 0 && <Badge variant="secondary">{activeFilterCount}</Badge>}
-              </span>
+                <ChevronDown className={cn("ml-auto size-4 text-muted-foreground transition-transform lg:hidden", filtersOpen && "rotate-180")} />
+              </button>
               {activeFilterCount > 0 && (
-                <Button variant="link" size="xs" className="h-auto px-0" onClick={clearAll}>
+                <Button variant="link" size="xs" className="ml-3 h-auto px-0" onClick={clearAll}>
                   Clear all
                 </Button>
               )}
             </div>
 
+            <div className={cn(!filtersOpen && "hidden", "lg:block")}>
             <FilterSection title="Stock">
               <FilterOption
                 checked={inStock}
@@ -408,11 +417,12 @@ export function BrowseLayout({
                 </div>
               </FilterSection>
             )}
+            </div>
           </Card>
         </aside>
 
         {/* ── Main: toolbar + table + pagination ─────────── */}
-        <main className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1">
           <div className="mb-3 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               {meta && (
@@ -518,7 +528,7 @@ export function BrowseLayout({
               />
             </div>
           )}
-        </main>
+        </div>
       </div>
 
       <CartBar

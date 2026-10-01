@@ -1,8 +1,9 @@
 import axios from "axios";
+import { apiRoot, remapLoopbackUrls } from "./apiBase";
 
 export const AUTH_EXPIRED_EVENT = "fastweb:auth-expired";
 
-const API_ROOT = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
+const API_ROOT = apiRoot();
 const AUTH_ENDPOINTS_WITHOUT_REFRESH = [
   "/auth/login",
   "/auth/register",
@@ -35,7 +36,10 @@ api.interceptors.request.use((config) => {
 let refreshPromise: Promise<string> | null = null;
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    response.data = remapLoopbackUrls(response.data);
+    return response;
+  },
   async (error) => {
     const original = error.config;
 

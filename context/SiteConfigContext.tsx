@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { apiRoot, remapLoopbackUrls } from "@/lib/apiBase";
 
 export interface SiteSettings {
   site_name?: string;
@@ -115,15 +116,14 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
     const client = process.env.NEXT_PUBLIC_HOMEPAGE_CLIENT || "central";
     const controller = new AbortController();
-    fetch(`${apiUrl}/api/homepage?client=${encodeURIComponent(client)}`, { signal: controller.signal, headers: { Accept: "application/json" } })
+    fetch(`${apiRoot()}/api/homepage?client=${encodeURIComponent(client)}`, { signal: controller.signal, headers: { Accept: "application/json" } })
       .then(async (response) => {
         if (!response.ok) throw new Error(`Homepage API returned ${response.status}`);
         return response.json() as Promise<HomepagePayload>;
       })
-      .then((payload) => setHomepage(payload))
+      .then((payload) => setHomepage(remapLoopbackUrls(payload)))
       .catch((error: unknown) => {
         if ((error as Error)?.name === "AbortError") return;
         setHomepage(null);

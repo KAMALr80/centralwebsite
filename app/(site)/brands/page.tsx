@@ -61,6 +61,7 @@ export default function BrandsPage() {
                       fill
                       sizes="(max-width: 768px) 50vw, 25vw"
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      unoptimized
                     />
                   ) : (
                     <Placeholder label={brand.name} />
