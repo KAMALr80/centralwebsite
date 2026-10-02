@@ -172,9 +172,9 @@ function HeroRow({ main, side }: { main: HomepageSection; side?: HomepageSection
   if (hasMain && hasSide && side) {
     return (
       <Section className="pt-6 md:pt-8">
-        <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+        <div className="grid gap-4 md:grid-cols-[2fr_1fr]">
           <HeroSlider section={main} className="aspect-[1041/396]" />
-          <HeroSlider section={side} className="aspect-[450/347] lg:aspect-auto lg:h-full" />
+          <HeroSlider section={side} className="aspect-[450/347] md:aspect-auto md:h-full" />
         </div>
       </Section>
     );
@@ -190,7 +190,7 @@ function HeroRow({ main, side }: { main: HomepageSection; side?: HomepageSection
 function BannerGrid({ items }: { items: HomepageItem[] }) {
   if (items.length === 0) return null;
   const gridColsClass =
-    items.length <= 2 ? "lg:grid-cols-[2fr_1fr]" : items.length === 3 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2 lg:grid-cols-4";
+    items.length <= 2 ? "md:grid-cols-[2fr_1fr]" : items.length === 3 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2 md:grid-cols-4";
   return (
     <div className={cn("grid gap-4", gridColsClass)}>
       {items.map((item) => (
@@ -220,7 +220,7 @@ function LiveCategories({ title }: { title: string }) {
   return (
     <Section>
       <SectionHeader title={title} href="/shop" />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
         {categories.slice(0, 8).map((category) => (
           <Link
             key={category.id}
@@ -258,7 +258,7 @@ function CategoryGrid({ section }: { section: HomepageSection }) {
   return (
     <Section>
       <ManagedHeader section={section} href="/shop" />
-      <div className={cn("grid gap-4", isBannerStyle ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6")}>
+      <div className={cn("grid gap-4", isBannerStyle ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-4" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6")}>
         {tiles.map((tile) =>
           isBannerStyle ? (
             <MaybeLink
@@ -369,7 +369,7 @@ function HomeProductCard({ product, isAuthenticated }: { product: Product; isAut
 }
 
 // Columns per breakpoint for product grids; must match the grid-cols classes in ProductRows.
-const PRODUCT_COLUMNS = { base: 2, md: 3, lg: 5, xl: 7 } as const;
+const PRODUCT_COLUMNS = { base: 2, md: 4, lg: 5, xl: 7 } as const;
 
 /** Hides the trailing products that would leave a half-empty last row at each breakpoint. */
 function fullRowsClass(index: number, total: number) {
@@ -384,7 +384,7 @@ function fullRowsClass(index: number, total: number) {
 
 function ProductRows({ products, isAuthenticated, keyPrefix = "" }: { products: Product[]; isAuthenticated: boolean; keyPrefix?: string }) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7">
       {products.map((product, index) => (
         <div key={`${keyPrefix}${product.id}`} className={fullRowsClass(index, products.length)}>
           <HomeProductCard product={product} isAuthenticated={isAuthenticated} />

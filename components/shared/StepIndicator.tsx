@@ -5,7 +5,7 @@ const STEPS = ["Cart", "Checkout", "Confirmation"];
 
 export function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
   return (
-    <ol className="flex items-center gap-1">
+    <ol className="flex flex-wrap items-center gap-1">
       {STEPS.map((label, i) => {
         const n = i + 1;
         const active = n === step;
@@ -23,7 +23,7 @@ export function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
               >
                 {done ? <Check className="size-3" /> : n}
               </span>
-              <span className={cn("font-mono text-xs uppercase tracking-wide", active ? "font-medium text-foreground" : "text-muted-foreground")}>
+              <span className={cn("font-mono text-xs uppercase tracking-wide", active ? "font-medium text-foreground" : "hidden text-muted-foreground sm:inline")}>
                 {label}
               </span>
             </div>

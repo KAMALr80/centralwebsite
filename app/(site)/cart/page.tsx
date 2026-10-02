@@ -92,7 +92,7 @@ export default function CartPage() {
       <div className="border-b border-border bg-card px-4 py-6 sm:px-8">
         <div className="mx-auto flex max-w-[1400px] flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="font-heading text-3xl font-semibold leading-none text-foreground">
+            <h1 className="font-heading text-2xl font-semibold leading-none text-foreground sm:text-3xl">
               Cart · draft P.O.
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -116,8 +116,8 @@ export default function CartPage() {
           </Link>
         </div>
       ) : (
-        <div className="mx-auto flex max-w-[1400px] flex-col items-start gap-6 px-4 py-6 sm:px-8 lg:flex-row">
-          <div className="min-w-0 flex-1 space-y-4">
+        <div className="mx-auto flex max-w-[1400px] flex-col items-start gap-4 px-3 py-4 sm:gap-6 sm:px-6 sm:py-6 lg:flex-row lg:px-8">
+          <div className="w-full min-w-0 flex-1 space-y-3 sm:space-y-4">
             {groups.map((group) => {
               const groupHasPendingPrices = group.items.some(
                 (item) => item.price_pending
@@ -166,7 +166,7 @@ export default function CartPage() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex shrink-0 items-center gap-1">
+                    <div className="flex w-full shrink-0 items-center justify-end gap-1 sm:w-auto">
                       <Link
                         href={`/product/${productId}`}
                         className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "no-underline")}
@@ -184,6 +184,49 @@ export default function CartPage() {
                     </div>
                   </div>
 
+                  <ul className="divide-y divide-border md:hidden">
+                    {group.items.map((item) => (
+                      <li key={item.product_id} className="space-y-2.5 px-4 py-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-[13px] leading-snug text-foreground">{item.name}</p>
+                            {item.sku && (
+                              <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">{item.sku}</p>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => removeItem(item.product_id)}
+                            className="-mr-2 -mt-1 shrink-0 text-muted-foreground hover:text-destructive"
+                            aria-label="Remove item"
+                          >
+                            <X />
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <QtyStepper
+                            value={item.quantity}
+                            onChange={(n) => updateQty(item.product_id, n)}
+                          />
+                          <div className="text-right">
+                            <p className="font-mono text-sm font-semibold text-foreground">
+                              {item.price_pending ? "—" : `$${(item.price * item.quantity).toFixed(2)}`}
+                            </p>
+                            <p className="font-mono text-[11px] text-muted-foreground">
+                              {item.price_pending
+                                ? pricesRefreshing
+                                  ? "Updating…"
+                                  : "Unavailable"
+                                : `$${item.price.toFixed(2)} each`}
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="hidden md:block">
                   <Table>
                     <TableHeader className="bg-muted/50">
                       <TableRow className="hover:bg-transparent">
@@ -235,6 +278,7 @@ export default function CartPage() {
                       ))}
                     </TableBody>
                   </Table>
+                  </div>
                 </Card>
               );
             })}
