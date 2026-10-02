@@ -317,7 +317,7 @@ function HomeProductCard({ product, isAuthenticated }: { product: Product; isAut
   }
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-lg bg-card ring-1 ring-foreground/10 transition-shadow hover:shadow-md hover:ring-primary/30">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-lg bg-card ring-1 ring-foreground/10 transition-shadow hover:shadow-md hover:ring-primary/30">
       <Link href={href} className="relative block aspect-square overflow-hidden bg-muted" aria-label={`View ${product.name}`}>
         {image ? (
           <Image src={image} alt={product.name} fill sizes="(max-width: 768px) 50vw, 15vw" className="object-contain p-3 transition-transform duration-300 group-hover:scale-105" unoptimized />
@@ -368,6 +368,32 @@ function HomeProductCard({ product, isAuthenticated }: { product: Product; isAut
   );
 }
 
+// Columns per breakpoint for product grids; must match the grid-cols classes in ProductRows.
+const PRODUCT_COLUMNS = { base: 2, md: 3, lg: 5, xl: 7 } as const;
+
+/** Hides the trailing products that would leave a half-empty last row at each breakpoint. */
+function fullRowsClass(index: number, total: number) {
+  const visible = (columns: number) => (total < columns ? total : Math.floor(total / columns) * columns);
+  return cn(
+    index < visible(PRODUCT_COLUMNS.base) ? "block" : "hidden",
+    index < visible(PRODUCT_COLUMNS.md) ? "md:block" : "md:hidden",
+    index < visible(PRODUCT_COLUMNS.lg) ? "lg:block" : "lg:hidden",
+    index < visible(PRODUCT_COLUMNS.xl) ? "xl:block" : "xl:hidden",
+  );
+}
+
+function ProductRows({ products, isAuthenticated, keyPrefix = "" }: { products: Product[]; isAuthenticated: boolean; keyPrefix?: string }) {
+  return (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7">
+      {products.map((product, index) => (
+        <div key={`${keyPrefix}${product.id}`} className={fullRowsClass(index, products.length)}>
+          <HomeProductCard product={product} isAuthenticated={isAuthenticated} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ProductGridSection({ section, products }: { section: HomepageSection; products: Product[] }) {
   const { isAuthenticated } = useAuth();
   const promos = section.items.filter((item) => item.kind === "content" && item.desktop_image_url).slice(0, 2);
@@ -375,13 +401,7 @@ function ProductGridSection({ section, products }: { section: HomepageSection; p
   return (
     <Section>
       <ManagedHeader section={section} href="/shop" />
-      {products.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7">
-          {products.map((product) => (
-            <HomeProductCard key={`${section.id}-${product.id}`} product={product} isAuthenticated={isAuthenticated} />
-          ))}
-        </div>
-      )}
+      {products.length > 0 && <ProductRows products={products} isAuthenticated={isAuthenticated} keyPrefix={`${section.id}-`} />}
       {promos.length > 0 && <div className="mt-4"><BannerGrid items={promos} /></div>}
     </Section>
   );
@@ -530,11 +550,7 @@ function LiveFallback() {
       {newest?.data?.length ? (
         <Section>
           <SectionHeader title={site.new_arrivals_title || "New arrivals"} href="/new" />
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7">
-            {newest.data.map((product) => (
-              <HomeProductCard key={product.id} product={product} isAuthenticated={isAuthenticated} />
-            ))}
-          </div>
+          <ProductRows products={newest.data} isAuthenticated={isAuthenticated} />
         </Section>
       ) : null}
     </>

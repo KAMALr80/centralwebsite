@@ -2,6 +2,7 @@
 
 import { ChevronDown, ChevronUp, Mail, MessageCircle, Phone, Send } from "lucide-react";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSiteConfig } from "@/context/SiteConfigContext";
@@ -12,9 +13,12 @@ const DEFAULT_COLUMNS = [
   {
     title: "Find It Fast",
     links: [
-      { label: "Cigar Accessories", url: "/shop?search=cigar%20accessories" },
-      { label: "Cleaning Products", url: "/shop?search=cleaning" },
-      { label: "Detox Supplements and Health", url: "/shop?search=detox" },
+      { label: "Nicotine Products and Alternatives", url: "/category/6" },
+      { label: "CBD & Hemp Wellness", url: "/category/73" },
+      { label: "Cigar Accessories", url: "/category/67" },
+      { label: "Cleaning Products", url: "/category/4?sub_cat=69" },
+      { label: "Detox Supplements and Health", url: "/category/32" },
+      { label: "E-Juice Flavors and Blends", url: "/category/48" },
     ],
   },
   {
@@ -26,6 +30,7 @@ const DEFAULT_COLUMNS = [
     links: [
       { label: "My Account", url: "/account/profile" },
       { label: "Track your Order", url: "/orders" },
+      { label: "Return/Exchange", url: "mailto:support@centralsmokedistro.com?subject=Return%2FExchange" },
       { label: "Category Directory", url: "/shop" },
       { label: "Contact Us", url: "mailto:support@centralsmokedistro.com" },
     ],
@@ -69,9 +74,15 @@ const DEFAULT_BUSINESS_HOURS = [
 ];
 
 const headingClass =
-  "mb-5 text-[19px] font-bold leading-tight tracking-[-0.02em] text-foreground";
+  "mb-4 text-[17px] font-bold leading-tight tracking-[-0.01em] text-foreground";
 const linkClass =
   "text-muted-foreground no-underline transition-colors hover:text-primary focus-visible:text-primary";
+const mobileLinkClass =
+  "text-primary no-underline transition-colors hover:underline focus-visible:underline";
+const summaryClass =
+  "flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 text-[15px] font-bold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary/40 [&::-webkit-details-marker]:hidden";
+const chevronClass =
+  "size-4 shrink-0 text-foreground transition-transform group-open:rotate-180";
 
 export function Footer() {
   const { site } = useSiteConfig();
@@ -95,38 +106,45 @@ export function Footer() {
   const instagramUrl = site.social_instagram_url;
   const whatsappUrl = site.social_whatsapp_url;
   const hasSocial = Boolean(facebookUrl || instagramUrl || whatsappUrl);
+  // Contact | one track per footer column (short columns stay narrow) | business hours.
+  const desktopColumnTemplate = ["1.35fr", ...columns.map((column) => (column.links.length <= 2 ? "0.6fr" : "1fr")), "1.2fr"].join(" ");
 
-  const contactRows = (
-    <ul className="space-y-3.5 text-[15px] leading-6 text-muted-foreground">
-      <li className="flex gap-3">
-        <Phone size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
-        <a href={`tel:${phone.replace(/[^+\d]/g, "")}`} className={linkClass}>{phone}</a>
-      </li>
-      <li className="flex gap-3 font-semibold text-foreground">
-        <MessageCircle size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
-        <span>{whatsappNotice}</span>
-      </li>
-      <li className="flex gap-3">
-        <Mail size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
-        <a href={`mailto:${email}`} className={`${linkClass} min-w-0 break-words`}>{email}</a>
-      </li>
-      <li className="flex gap-3">
-        <Mail size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-foreground" />
-        <a href={`mailto:${supportEmail}`} className={`${linkClass} min-w-0 break-words`}>{supportEmail}</a>
-      </li>
-    </ul>
-  );
+  const contactList = (centered: boolean) => {
+    const row = centered ? "flex items-center justify-center gap-2.5" : "flex gap-3";
+    const icon = centered ? "shrink-0 text-foreground" : "mt-0.5 shrink-0 text-foreground";
+    const link = centered ? mobileLinkClass : linkClass;
+    return (
+      <ul className={centered ? "space-y-3.5 text-[15px] leading-6 text-muted-foreground" : "space-y-2.5 text-[14px] leading-6 text-muted-foreground"}>
+        <li className={row}>
+          <Phone size={18} strokeWidth={1.8} className={icon} />
+          <a href={`tel:${phone.replace(/[^+\d]/g, "")}`} className={link}>{phone}</a>
+        </li>
+        <li className={`${row} font-semibold text-foreground`}>
+          <MessageCircle size={18} strokeWidth={1.8} className={icon} />
+          <span>{whatsappNotice}</span>
+        </li>
+        <li className={row}>
+          <Mail size={18} strokeWidth={1.8} className={icon} />
+          <a href={`mailto:${email}`} className={`${link} min-w-0 break-all`}>{email}</a>
+        </li>
+        <li className={row}>
+          <Mail size={18} strokeWidth={1.8} className={icon} />
+          <a href={`mailto:${supportEmail}`} className={`${link} min-w-0 break-all`}>{supportEmail}</a>
+        </li>
+      </ul>
+    );
+  };
 
   return (
     <footer className="relative border-t-4 border-primary bg-card text-foreground">
       {newsletterEnabled && (
-        <div className="border-b border-white/10 bg-foreground px-6 py-4 text-white lg:px-10">
-          <div className="mx-auto flex max-w-[1768px] flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-4 text-[20px] font-bold tracking-[-0.02em]">
+        <div className="hidden border-b border-white/10 bg-foreground px-10 py-4 text-white lg:block">
+          <div className="mx-auto flex max-w-[1500px] flex-row items-center justify-between gap-5">
+            <div className="flex items-center justify-center gap-4 text-[20px] font-bold tracking-[-0.02em] lg:justify-start">
               <Send size={26} className="shrink-0 text-primary" />
               {newsletterTitle}
             </div>
-            <form className="flex w-full max-w-[620px] gap-2">
+            <form className="mx-auto flex w-full max-w-[620px] gap-2 lg:mx-0">
               <Input
                 type="email"
                 placeholder={newsletterPlaceholder}
@@ -140,9 +158,12 @@ export function Footer() {
         </div>
       )}
 
-      <div className="mx-auto hidden max-w-[1760px] gap-x-8 gap-y-10 px-6 py-10 lg:grid lg:grid-cols-3 lg:px-10 lg:py-11 xl:grid-cols-[1fr_1.4fr_0.85fr_0.55fr_0.85fr_1.25fr] 2xl:grid-cols-[210px_330px_220px_140px_220px_300px] 2xl:justify-between">
-        <div className="lg:col-span-1">
-          <Logo size={110} />
+      <div
+        className="mx-auto hidden max-w-[1500px] gap-x-8 gap-y-6 px-10 py-9 lg:grid lg:[grid-template-columns:var(--footer-cols)] xl:[grid-template-columns:auto_var(--footer-cols)] xl:gap-x-10"
+        style={{ "--footer-cols": desktopColumnTemplate } as CSSProperties}
+      >
+        <div className="lg:col-span-full xl:col-span-1">
+          <Logo size={96} />
           {site.footer_tagline && (
             <p className="mt-5 max-w-[230px] text-[15px] leading-7 text-muted-foreground">
               {site.footer_tagline}
@@ -152,13 +173,13 @@ export function Footer() {
 
         <div>
           <h2 className={headingClass}>{assistanceTitle}</h2>
-          <address className="not-italic">{contactRows}</address>
+          <address className="not-italic">{contactList(false)}</address>
         </div>
 
         {columns.map((column) => (
           <div key={column.title}>
             <h2 className={headingClass}>{column.title}</h2>
-            <ul className="space-y-3.5 text-[15px] leading-6">
+            <ul className="space-y-2.5 text-[14px] leading-6">
               {column.links.map((item) => (
                 <li key={item.label}>
                   <Link href={item.url} className={linkClass}>{item.label}</Link>
@@ -170,11 +191,11 @@ export function Footer() {
 
         <div>
           <h2 className={headingClass}>{businessHoursTitle}</h2>
-          <ul className="space-y-2 text-[15px] leading-6 text-muted-foreground">
+          <ul className="space-y-1.5 text-[14px] leading-6 text-muted-foreground">
             {businessHours.map((entry) => {
               const [day, hours] = entry.includes(":") ? [entry.slice(0, entry.indexOf(":")), entry.slice(entry.indexOf(":") + 1).trim()] : [entry, ""];
               return (
-                <li key={entry} className="grid grid-cols-[90px_1fr] gap-3">
+                <li key={entry} className="grid grid-cols-[92px_1fr] gap-3">
                   <span>{day}</span>
                   <span className="whitespace-nowrap">{hours}</span>
                 </li>
@@ -185,37 +206,31 @@ export function Footer() {
       </div>
 
       <div className="lg:hidden">
-        <div className="divide-y divide-border border-t border-border px-6">
+        <div className="space-y-2.5 bg-muted px-4 py-4 sm:px-6">
           {columns.map((column) => (
-            <details key={column.title} className="group py-1">
-              <summary className="flex cursor-pointer list-none items-center justify-between py-3 text-[15px] font-bold text-foreground">
+            <details key={column.title} className="group rounded-lg bg-card px-5">
+              <summary className={summaryClass}>
                 {column.title}
-                <ChevronDown size={18} className="shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+                <ChevronDown className={chevronClass} strokeWidth={2.75} />
               </summary>
-              <ul className="space-y-3 pb-4 text-[15px] leading-6">
+              <ul className="space-y-2.5 pb-4 text-[14px] leading-5">
                 {column.links.map((item) => (
                   <li key={item.label}>
-                    <Link href={item.url} className={linkClass}>{item.label}</Link>
+                    <Link href={item.url} className={mobileLinkClass}>{item.label}</Link>
                   </li>
                 ))}
               </ul>
             </details>
           ))}
-          <details className="group py-1">
-            <summary className="flex cursor-pointer list-none items-center justify-between py-3 text-[15px] font-bold text-foreground">
+          <details className="group rounded-lg bg-card px-5">
+            <summary className={summaryClass}>
               {businessHoursTitle}
-              <ChevronDown size={18} className="shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+              <ChevronDown className={chevronClass} strokeWidth={2.75} />
             </summary>
-            <ul className="space-y-2 pb-4 text-[15px] leading-6 text-muted-foreground">
-              {businessHours.map((entry) => {
-                const [day, hours] = entry.includes(":") ? [entry.slice(0, entry.indexOf(":")), entry.slice(entry.indexOf(":") + 1).trim()] : [entry, ""];
-                return (
-                  <li key={entry} className="grid grid-cols-[90px_1fr] gap-3">
-                    <span>{day}</span>
-                    <span className="whitespace-nowrap">{hours}</span>
-                  </li>
-                );
-              })}
+            <ul className="space-y-1.5 pb-4 text-[14px] leading-5 text-foreground/80">
+              {businessHours.map((entry) => (
+                <li key={entry}>{entry}</li>
+              ))}
             </ul>
           </details>
         </div>
@@ -244,15 +259,15 @@ export function Footer() {
           <div className="flex justify-center">
             <Logo size={90} />
           </div>
-          <h2 className={`${headingClass} mt-5`}>{assistanceTitle}</h2>
-          <address className="mx-auto inline-block text-left not-italic">{contactRows}</address>
+          <h2 className="mb-4 mt-5 text-[18px] font-bold leading-tight text-foreground">{assistanceTitle}</h2>
+          <address className="not-italic">{contactList(true)}</address>
         </div>
       </div>
 
       <div className="border-t border-border bg-muted/40 px-6 py-4 lg:px-10">
         <div className="mx-auto max-w-[1680px] text-center text-[13px] text-muted-foreground">
-          © {footerCopyright} - {year} - All Rights Reserved
-          {footerCredit && <> | {footerCredit}</>}
+          <span className="block sm:inline">© {footerCopyright} - {year} - All Rights Reserved</span>
+          {footerCredit && <><span className="hidden sm:inline"> | </span><span className="block sm:inline">{footerCredit}</span></>}
         </div>
       </div>
 
