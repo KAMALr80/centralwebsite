@@ -90,11 +90,11 @@ function ManagedHeader({ section, href, linkLabel }: { section: HomepageSection;
   return <HeadingBanner section={section} />;
 }
 
-function ResponsiveImage({ item, className, eager = false }: { item: HomepageItem; className?: string; eager?: boolean }) {
+function ResponsiveImage({ item, className, eager = false, imgRef }: { item: HomepageItem; className?: string; eager?: boolean; imgRef?: (img: HTMLImageElement | null) => void }) {
   return (
     <picture>
       {item.mobile_image_url && <source media="(max-width: 640px)" srcSet={item.mobile_image_url} />}
-      <img src={item.desktop_image_url} alt={item.alt_text || item.title || ""} loading={eager ? "eager" : "lazy"} className={className} />
+      <img ref={imgRef} src={item.desktop_image_url} alt={item.alt_text || item.title || ""} loading={eager ? "eager" : "lazy"} className={className} />
     </picture>
   );
 }
@@ -187,17 +187,40 @@ function HeroRow({ main, side }: { main: HomepageSection; side?: HomepageSection
   );
 }
 
+// An image this many times wider than tall is a heading strip, not a promo tile.
+const STRIP_ASPECT_RATIO = 6;
+
 function BannerGrid({ items }: { items: HomepageItem[] }) {
+  const [stripIds, setStripIds] = useState<ReadonlySet<number>>(() => new Set());
   if (items.length === 0) return null;
+
+  // Strips saved as regular banners get their own full-width row instead of
+  // squeezing into the tile grid.
+  const detectStrip = (id: number) => (img: HTMLImageElement | null) => {
+    if (!img) return;
+    const check = () => {
+      if (img.naturalHeight > 0 && img.naturalWidth / img.naturalHeight >= STRIP_ASPECT_RATIO) {
+        setStripIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
+      }
+    };
+    if (img.complete) check();
+    else img.addEventListener("load", check, { once: true });
+  };
+
+  const strips = items.filter((item) => stripIds.has(item.id));
+  const tiles = items.filter((item) => !stripIds.has(item.id));
   const gridColsClass =
-    items.length <= 2 ? "md:grid-cols-[2fr_1fr]" : items.length === 3 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2 md:grid-cols-4";
+    tiles.length <= 2 ? "md:grid-cols-[2fr_1fr]" : tiles.length === 3 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2 md:grid-cols-4";
+  const renderBanner = (item: HomepageItem) => (
+    <MaybeLink key={item.id} href={item.link_url} label={item.alt_text || item.title || undefined} className="group block overflow-hidden rounded-xl bg-muted">
+      <ResponsiveImage item={item} imgRef={detectStrip(item.id)} className="block h-auto w-full transition-transform duration-300 group-hover:scale-[1.02]" />
+    </MaybeLink>
+  );
+
   return (
-    <div className={cn("grid gap-4", gridColsClass)}>
-      {items.map((item) => (
-        <MaybeLink key={item.id} href={item.link_url} label={item.alt_text || item.title || undefined} className="group block overflow-hidden rounded-xl bg-muted">
-          <ResponsiveImage item={item} className="block h-auto w-full transition-transform duration-300 group-hover:scale-[1.02]" />
-        </MaybeLink>
-      ))}
+    <div className="space-y-4">
+      {strips.map(renderBanner)}
+      {tiles.length > 0 && <div className={cn("grid items-start gap-4", gridColsClass)}>{tiles.map(renderBanner)}</div>}
     </div>
   );
 }
