@@ -45,6 +45,13 @@ interface ServerCartItem {
   parent_name: string | null;
 }
 
+// The gateway returns { data: { items, item_count, subtotal, ... } }; older gateways returned the items directly.
+type ServerCart = ServerCartItem[] | { items: ServerCartItem[] };
+
+function serverItems(cart: ServerCart): ServerCartItem[] {
+  return Array.isArray(cart) ? cart : cart.items;
+}
+
 const CartContext = createContext<CartContextValue | null>(null);
 
 // The account's cart lives on the API so it follows the user across devices;
@@ -52,6 +59,8 @@ const CartContext = createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "fastweb_cart";
 // Set once a browser's pre-sync cart has been merged into the account.
 const SYNCED_KEY = "fastweb_cart_synced";
+// The merge adds quantities together; the gateway ignores a repeated merge with the same id.
+const MERGE_ID_KEY = "fastweb_cart_merge_id";
 const REFRESH_INTERVAL_MS = 30_000;
 const EMPTY_CART: CartItem[] = [];
 const cartListeners = new Set<() => void>();
@@ -138,6 +147,7 @@ export function clearStoredCart() {
   try {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(SYNCED_KEY);
+    localStorage.removeItem(MERGE_ID_KEY);
   } catch {
     // The in-memory cart is still cleared when browser storage is unavailable.
   }
@@ -182,8 +192,20 @@ let queuedCount = 0;
 let mutationVersion = 0;
 let syncInFlight: Promise<void> | null = null;
 
-function applyServerCart(items: ServerCartItem[]) {
-  if (queuedCount === 0) writeCartItems(fromServer(items));
+function applyServerCart(cart: ServerCart) {
+  if (queuedCount === 0) writeCartItems(fromServer(serverItems(cart)));
+}
+
+function mergeId(): string {
+  const fresh = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+  try {
+    const stored = localStorage.getItem(MERGE_ID_KEY);
+    if (stored) return stored;
+    localStorage.setItem(MERGE_ID_KEY, fresh);
+  } catch {
+    // Without storage the id still guards retries of this one request.
+  }
+  return fresh;
 }
 
 function syncFromServer(): Promise<void> {
@@ -202,15 +224,16 @@ function syncFromServer(): Promise<void> {
     const local = getCartSnapshot();
     const res =
       needsMerge && local.length > 0
-        ? await api.post<{ data: ServerCartItem[] }>("/cart/merge", {
+        ? await api.post<{ data: ServerCart }>("/cart/merge", {
+            merge_id: mergeId(),
             items: local.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
           })
-        : await api.get<{ data: ServerCartItem[] }>("/cart");
+        : await api.get<{ data: ServerCart }>("/cart");
 
     try {
       localStorage.setItem(SYNCED_KEY, "1");
     } catch {
-      // Ignore — the next sync simply merges again, which is idempotent.
+      // Ignore — the next sync merges again with the same merge_id, which the gateway skips.
     }
     // A cart change made while this request was out wins over its stale reply.
     if (startedAt === mutationVersion) applyServerCart(res.data.data);
@@ -225,7 +248,7 @@ function syncFromServer(): Promise<void> {
   return syncInFlight;
 }
 
-function sendMutation(request: () => Promise<{ data: { data: ServerCartItem[] } }>) {
+function sendMutation(request: () => Promise<{ data: { data: ServerCart } }>) {
   if (!hasSession()) return;
 
   queuedCount += 1;

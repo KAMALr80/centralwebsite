@@ -395,9 +395,12 @@ export default function CheckoutPage() {
       clearCart();
       router.push(`/orders/${res.data.data.id}`);
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { status?: number; data?: { message?: string } } };
+      const axiosErr = err as { response?: { status?: number; data?: { message?: string; errors?: Record<string, string[]> } } };
       const status = axiosErr?.response?.status;
-      if (status === 422) {
+      if (status === 422 && axiosErr.response?.data?.errors?.billing_state) {
+        // The gateway needs a state: the ERP's taxes depend on it.
+        setError(axiosErr.response.data.message ?? "Please add your state to your address.");
+      } else if (status === 422) {
         setError("One or more products are no longer available. Please review your cart.");
       } else if (status === 403) {
         setError("Your account is not approved for ordering yet.");
