@@ -38,7 +38,7 @@ export function UtilityBar() {
   if (!isAuthenticated) {
     return (
       <header className="border-t-[3px] border-primary bg-background">
-        <div className="mx-auto flex min-h-[76px] max-w-[1500px] items-center gap-5 px-4 py-3 lg:px-10">
+        <div className="mx-auto flex min-h-[76px] max-w-[1900px] items-center gap-5 px-4 py-3 lg:px-10">
           <Logo size={70} />
 
           <div className="mx-auto hidden items-center gap-6 text-[12px] text-muted-foreground lg:flex">
@@ -66,7 +66,7 @@ export function UtilityBar() {
   return (
     <header className="bg-background">
       <div className="border-b border-border bg-muted px-4 py-2 text-[11px] text-muted-foreground lg:px-10">
-        <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4">
+        <div className="mx-auto flex max-w-[1900px] items-center justify-between gap-4">
           <div className="flex items-center gap-5">
             <a href={`tel:${phone.replace(/[^+\d]/g, "")}`} className="inline-flex items-center gap-1.5 text-muted-foreground no-underline hover:text-primary">
               <Phone size={12} /> {phone}
@@ -88,7 +88,7 @@ export function UtilityBar() {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-[1500px] flex-wrap items-center gap-4 px-4 py-5 lg:flex-nowrap lg:gap-8 lg:px-10">
+      <div className="mx-auto flex max-w-[1900px] flex-wrap items-center gap-4 px-4 py-5 lg:flex-nowrap lg:gap-8 lg:px-10">
         <Logo size={82} />
         {isAuthenticated && (
           <form onSubmit={handleSearch} className="order-3 flex w-full gap-2 lg:order-none lg:mx-auto lg:max-w-[720px]">

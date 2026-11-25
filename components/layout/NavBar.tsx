@@ -68,10 +68,10 @@ export function NavBar() {
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b-[3px] border-primary bg-black text-white shadow-md">
-      <div className="mx-auto hidden w-full max-w-[1900px] items-stretch justify-center px-2 xl:flex">
+      <div className="mx-auto hidden w-full max-w-[1900px] flex-wrap items-stretch justify-center px-2 xl:flex">
         {groups.map((group) => (
           <div key={group.label} className={group.items.length <= 6 ? "relative" : "static"} onMouseEnter={() => setOpenMenu(group.label)} onMouseLeave={() => setOpenMenu(null)}>
-            <button type="button" onClick={() => setOpenMenu(openMenu === group.label ? null : group.label)} className={`flex h-full items-center gap-1 whitespace-nowrap border-b-[3px] px-3 py-4 text-[10px] font-black uppercase transition-colors 2xl:px-4 2xl:text-xs ${openMenu === group.label ? "border-white bg-primary" : "border-transparent hover:border-primary hover:bg-primary"}`} aria-expanded={openMenu === group.label}>{group.label} <ChevronDown size={12} className={`transition-transform ${openMenu === group.label ? "rotate-180" : ""}`} /></button>
+            <button type="button" onClick={() => setOpenMenu(openMenu === group.label ? null : group.label)} className={`flex h-full items-center gap-1 whitespace-nowrap border-b-[3px] px-2.5 py-4 text-[10px] font-black uppercase transition-colors 2xl:px-3 2xl:text-xs ${openMenu === group.label ? "border-white bg-primary" : "border-transparent hover:border-primary hover:bg-primary"}`} aria-expanded={openMenu === group.label}>{group.label} <ChevronDown size={12} className={`transition-transform ${openMenu === group.label ? "rotate-180" : ""}`} /></button>
             {openMenu === group.label && (
               <div className={`absolute left-1/2 top-full -translate-x-1/2 overflow-hidden rounded-b-2xl border border-t-0 border-border bg-card text-card-foreground shadow-2xl ${group.items.length <= 6 ? "w-[620px]" : group.items.length <= 12 ? "w-[min(1180px,calc(100vw-24px))]" : "w-[min(1880px,calc(100vw-24px))]"}`}>
                 <div className={`grid ${group.items.length <= 6 ? "grid-cols-[1fr_250px]" : "grid-cols-[1fr_260px]"}`}>
@@ -108,11 +108,11 @@ export function NavBar() {
           </div>
         ))}
         <div className="static" onMouseEnter={() => setOpenMenu("brands")} onMouseLeave={() => setOpenMenu(null)}>
-          <button type="button" onClick={() => setOpenMenu(openMenu === "brands" ? null : "brands")} className="flex h-full items-center gap-1 whitespace-nowrap px-3 py-4 text-[10px] font-black uppercase hover:bg-primary 2xl:px-4 2xl:text-xs">{brandTitle} <ChevronDown size={12} /></button>
+          <button type="button" onClick={() => setOpenMenu(openMenu === "brands" ? null : "brands")} className="flex h-full items-center gap-1 whitespace-nowrap px-2.5 py-4 text-[10px] font-black uppercase hover:bg-primary 2xl:px-3 2xl:text-xs">{brandTitle} <ChevronDown size={12} /></button>
           {openMenu === "brands" && <div className="absolute left-1/2 top-full w-[min(1120px,calc(100vw-32px))] -translate-x-1/2 rounded-b-xl bg-white p-6 text-[#18202a] shadow-xl"><div className="grid grid-cols-6 gap-3">{brands.slice(0, 12).map((brand) => <Link key={brand.id} href={`/brand/${brand.id}`} onClick={() => setOpenMenu(null)} className="flex min-h-24 flex-col items-center justify-center rounded-md border p-3 text-center text-xs font-bold no-underline hover:border-[#246697]">{brand.image && <span className="relative mb-2 h-12 w-full"><Image src={brand.image} alt="" fill sizes="130px" className="object-contain" unoptimized /></span>}{brand.name}</Link>)}</div></div>}
         </div>
-        <Link href={saleUrl} className="flex items-center whitespace-nowrap px-3 py-4 text-[10px] font-black uppercase text-red-500 no-underline hover:bg-primary 2xl:px-4 2xl:text-xs">{saleLabel}</Link>
-        <Link href="/shop" className="flex items-center whitespace-nowrap px-3 py-4 text-[10px] font-black uppercase text-white no-underline hover:bg-primary 2xl:px-4 2xl:text-xs">{shopAllLabel}</Link>
+        <Link href={saleUrl} className="flex items-center whitespace-nowrap px-2.5 py-4 text-[10px] font-black uppercase text-red-500 no-underline hover:bg-primary 2xl:px-3 2xl:text-xs">{saleLabel}</Link>
+        <Link href="/shop" className="flex items-center whitespace-nowrap px-2.5 py-4 text-[10px] font-black uppercase text-white no-underline hover:bg-primary 2xl:px-3 2xl:text-xs">{shopAllLabel}</Link>
       </div>
 
       <div className="flex items-center justify-between px-4 py-3 xl:hidden">

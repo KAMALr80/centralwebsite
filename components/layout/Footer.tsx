@@ -139,7 +139,7 @@ export function Footer() {
     <footer className="relative border-t-4 border-primary bg-card text-foreground">
       {newsletterEnabled && (
         <div className="hidden border-b border-white/10 bg-foreground px-10 py-4 text-white lg:block">
-          <div className="mx-auto flex max-w-[1500px] flex-row items-center justify-between gap-5">
+          <div className="mx-auto flex max-w-[1900px] flex-row items-center justify-between gap-5">
             <div className="flex items-center justify-center gap-4 text-[20px] font-bold tracking-[-0.02em] lg:justify-start">
               <Send size={26} className="shrink-0 text-primary" />
               {newsletterTitle}
@@ -159,7 +159,7 @@ export function Footer() {
       )}
 
       <div
-        className="mx-auto hidden max-w-[1500px] gap-x-8 gap-y-6 px-10 py-9 lg:grid lg:[grid-template-columns:var(--footer-cols)] xl:[grid-template-columns:auto_var(--footer-cols)] xl:gap-x-10"
+        className="mx-auto hidden max-w-[1900px] gap-x-8 gap-y-6 px-10 py-9 lg:grid lg:[grid-template-columns:var(--footer-cols)] xl:[grid-template-columns:auto_var(--footer-cols)] xl:gap-x-10"
         style={{ "--footer-cols": desktopColumnTemplate } as CSSProperties}
       >
         <div className="lg:col-span-full xl:col-span-1">

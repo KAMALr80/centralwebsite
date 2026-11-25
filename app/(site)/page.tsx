@@ -38,7 +38,7 @@ function SectionHeader({ title, href, linkLabel }: { title: string; href?: strin
 }
 
 function Section({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <section className={cn("mx-auto w-full max-w-[1500px] px-4 py-5 md:px-8 md:py-7", className)}>{children}</section>;
+  return <section className={cn("mx-auto w-full max-w-[1900px] px-4 py-5 md:px-8 md:py-7", className)}>{children}</section>;
 }
 
 /** Renders the uploaded heading banner (image and/or promo video); null when the section has none. */
